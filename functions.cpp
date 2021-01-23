@@ -463,7 +463,7 @@ void do_ccsdnondisp(const Dimer& dim, std::ostream& os, ostream& csv) {
 
 	fmt::fprintf(csv, fs4, "NonDispSP:,", dim.nondispStrong);
 	fmt::fprintf(csv, fs4, "NonDispWP:,", dim.nondispWeak);
-	fmt::fprintf(csv, fs4, "NonDispSum:;", dim.nondispStrong+dim.nondispWeak);
+	fmt::fprintf(csv, fs4, "NonDispSum:,", dim.nondispStrong+dim.nondispWeak);
 	fmt::fprintf(csv, "\n");
 }
 
