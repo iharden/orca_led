@@ -382,7 +382,7 @@ void do_ccsddisp(const Dimer& dim, std::ostream& os, ostream& csv) {
 			tmp=fmt::format("Dispersion (strong pairs) between fragments {} and {}:", i, j);
 			fmt::fprintf(os, fs5, tmp, dim.fragccDispstrong[N]);
 
-			tmp=fmt::format("DispSP_{}_{}:;", i, j);
+			tmp=fmt::format("DispSP_{}_{}:,", i, j);
 			fmt::fprintf(csv, fs4, tmp, dim.fragccDispstrong[N]);
 			++N;
 		}
@@ -395,7 +395,7 @@ void do_ccsddisp(const Dimer& dim, std::ostream& os, ostream& csv) {
 			tmp=fmt::format("Dispersion (weak pairs) between fragments {} and {}:", i, j);
 			fmt::fprintf(os, fs5, tmp, dim.fragccDispweak[N]);
 
-			tmp=fmt::format("DispWP_{}_{}:;", i, j);
+			tmp=fmt::format("DispWP_{}_{}:,", i, j);
 			fmt::fprintf(csv, fs4, tmp, dim.fragccDispweak[N]);
 			++N;
 		}
