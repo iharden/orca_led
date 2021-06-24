@@ -208,7 +208,7 @@ Dimer::Dimer(string argv) {
 			if(hftype=="RHF")
 				s = str(format("Interaction correlation for Fragments   %1% and   %2%:") % i % j );
 			else if(hftype=="UHF")
-				s = str(format("Interaction correlation for Fragments   %1% and  %2%:") % i % j );
+				s = str(format("Interaction correlation for Fragments   %1% and  %2%:") % i % j );S
 			else
 				throw runtime_error("Unknown HFType");
 

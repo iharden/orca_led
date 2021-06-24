@@ -37,6 +37,7 @@ void print_header(std::ostream& os);
 void do_generalinfo(const Dimer& dim, std::ostream& os, std::ostream& csv);
 void do_hartreefock(const Dimer& dim, std::ostream& os, std::ostream& csv);
 void do_intra(const Dimer& dim, std::ostream& os, std::ostream& csv);
+void do_inter(const Dimer& dim, std::ostream& os, std::ostream& csv);
 void do_ccsddisp(const Dimer& dim, std::ostream& os, std::ostream& csv);
 void do_triplesdisp(const Dimer& dim, std::ostream& os, std::ostream& csv);
 void do_ccsdnondisp(const Dimer& dim, std::ostream& os, std::ostream& csv);

@@ -19,6 +19,8 @@ namespace {
 	string fs4="%-15s %5.5f \n";  // general infos
 	string fs5="%-70s %5.5f \n";  // mostly used for OS
 
+	string fs9="%-70s %5.5f %5.1f %5.5f %5.1f \n";  // For Inter-comparison
+
 	string fs6="%-20s %5.5f \n";  // print EInt for CSV
 
 	string fs7="%-50s %12.5f %12.5f %12.5f \n"; // compare OS
@@ -36,6 +38,7 @@ void do_led(const Dimer& dim, ostream& os, ostream& csv) {
 	do_generalinfo(dim, os, csv);
 	do_hartreefock(dim, os, csv);
 	do_intra(dim, os, csv);
+	do_inter(dim, os, csv);
 	do_ccsddisp(dim, os, csv);
 	do_triplesdisp(dim, os, csv);
 	do_ccsdnondisp(dim, os, csv);
@@ -366,6 +369,51 @@ void do_intra(const Dimer& dim, std::ostream& os, ostream& csv) {
 	csv << "\n";
 }
 
+
+void do_inter(const Dimer& dim, std::ostream& os, ostream& csv) {
+
+	string tmp{};
+
+	fmt::fprintf(os, "\n");
+	fmt::fprintf(os, "\n");
+	fmt::fprintf(os, "\n");
+	fmt::fprintf(os, "******* INTERACTION ENERGIES BETWEEN FRAGMENTS ******* \n");
+	fmt::fprintf(os, "\n");
+	fmt::fprintf(os, "Warning: To calculate the percentages the absolute amount of the energies was used! \n");
+	fmt::fprintf(os, "\n");
+
+	// Calculate HF-Interaction
+	vector<double> hfint{};
+	for(size_t i=0;i<dim.fraghfJ.size();++i)
+		hfint.push_back(dim.fraghfJ[i]+dim.fraghfK[i]);
+
+	// Calculate CC-Interaction
+	vector<double> ccint{};
+	for(size_t i=0;i<dim.fragInterstrong.size();++i)
+		ccint.push_back(dim.fragInterstrong[i]+dim.fragInterweak[i]+dim.fragIntertriples[i]);
+
+
+	string fs9="%-70s %-10.5f %-5.1f %-10.5f %-5.1f \n";
+	fmt::fprintf(os, "%-70s %-10s %-5s %-10s %-5s \n", " ", "HFint", "%", "CCint", "%");
+
+	int N=0;
+	double percent=0;
+
+	for(int i=2;i<=dim.nfrag;++i) {
+		for(int j=1;j<i;++j) {
+			percent=abs(hfint[N])/(abs(ccint[N])+abs(hfint[N])) * 100;
+			tmp=fmt::format("Interaction between fragments {} and {}:", i, j);
+			fmt::fprintf(os, fs9, tmp, hfint[N], percent, ccint[N], 100-percent);
+
+			/*tmp=fmt::format("TotalInt_{}_{}:,", i, j);
+			fmt::fprintf(csv, fs4, tmp, dim.fragccDispstrong[N]); */
+			++N;
+		}
+	}
+	fmt::fprintf(os, "\n");
+}
+
+
 void do_ccsddisp(const Dimer& dim, std::ostream& os, ostream& csv) {
 	string tmp{};
 	int N=0;
@@ -373,7 +421,7 @@ void do_ccsddisp(const Dimer& dim, std::ostream& os, ostream& csv) {
 	fmt::fprintf(os, "\n");
 	fmt::fprintf(os, "\n");
 	fmt::fprintf(os, "\n");
-	fmt::fprintf(os, "******* DECOMPOSITION OF CCSD-Dispersion ******* \n");
+	fmt::fprintf(os, "******* DECOMPOSITION OF CCSD-DISPERSION ******* \n");
 	fmt::fprintf(os, "\n");
 
 	N=0;
@@ -421,7 +469,7 @@ void do_triplesdisp(const Dimer& dim, std::ostream& os, ostream& csv) {
 	fmt::fprintf(os, "\n");
 	fmt::fprintf(os, "\n");
 	fmt::fprintf(os, "\n");
-	fmt::fprintf(os, "******* Triples correction to Dispersion ******* \n");
+	fmt::fprintf(os, "******* TRIPLES CORRECTION TO DISPERSION ******* \n");
 	fmt::fprintf(os, "\n");
 
 	N=0;
@@ -454,7 +502,7 @@ void do_ccsdnondisp(const Dimer& dim, std::ostream& os, ostream& csv) {
 	fmt::fprintf(os, "\n");
 	fmt::fprintf(os, "\n");
 	fmt::fprintf(os, "\n");
-	fmt::fprintf(os, "******* DECOMPOSITION OF CCSD-Nondispersion ******* \n");
+	fmt::fprintf(os, "******* DECOMPOSITION OF CCSD-NONDISPERSION ******* \n");
 	fmt::fprintf(os, "\n");
 	fmt::fprintf(os, "Warning: NonDisp (Strong Pairs) includes Singles excitations! \n");
 	fmt::fprintf(os, fs5, "Sum of Nondispersion(strong pairs):", dim.nondispStrong);
@@ -549,11 +597,54 @@ void do_generalinfo(const Dimer& dim, vector<Monomer>& mons, ostream& os) {
 	if(mons.size() == dim.nfrag) {
 		fmt::fprintf(os, "I will calculate the electronic preparation \n");
 		fmt::fprintf(os, "\n");
+
+		// Check the total number of electrons
+		double sum=0.0;
+		for(int i=0;i<dim.nfrag;++i)
+			sum += mons[i].nel;
+		if(sum != dim.nel) {
+			fmt::fprintf(cerr, "Sum of electrons of fragments does not match number of electrons of dimer. I will abort \n");
+			fmt::fprintf(os, "Sum of electrons of fragments does not match number of electrons of dimer. I will abort \n");
+			throw runtime_error("Numbers of electrons do not match");
+		}
 	}
 
 	if(mons.size() == 2*dim.nfrag) {
 		fmt::fprintf(os, "I will calculate the geometric and the electronic preparation \n");
 		fmt::fprintf(os, "\n");
+
+		// Check the total number of electrons
+		double sum=0.0;
+		for(int i=0;i<dim.nfrag;++i)
+			sum += mons[i].nel;
+		if(sum != dim.nel) {
+			fmt::fprintf(cerr, "Sum of electrons of fragments does not match number of electrons of dimer. I will abort \n");
+			fmt::fprintf(os, "Sum of electrons of fragments does not match number of electrons of dimer. I will abort \n");
+			throw runtime_error("Numbers of electrons do not match");
+		}
+
+		// Check number of basis functions and electrons
+		for(int i=0;i<dim.nfrag;++i) {
+			if(mons[i].nbasis != mons[dim.nfrag+i].nbasis) {
+				tmp = fmt::format("Number of basis functions for fragment {} does not match. Either you specified the files in the wrong order "
+						"or your calculations were not carried out at the same level. I will abort \n", i);
+				fmt::fprintf(cerr, tmp);
+				fmt::fprintf(os, tmp);
+
+				tmp=fmt::format("nbasis: {} {} \n", mons[i].nbasis, mons[dim.nfrag+i].nbasis);
+				fmt::fprintf(cerr, tmp);
+				throw runtime_error("Wrong number of basis functions");
+			}
+
+			if(mons[i].nel != mons[dim.nfrag+i].nel) {
+				tmp = fmt::format("Number of electrons for fragment {} does not match. Either you specified the files in the wrong order "
+						"or your calculations were not carried out at the same level. I will abort", i);
+				fmt::fprintf(cerr, tmp);
+				fmt::fprintf(os, tmp);
+				throw runtime_error("Wrong number of electrons");
+			}
+		}
+
 		// CHECK IF YOU MESSED UP ORDER
 		for(int i=0;i<dim.nfrag;++i) {
 			if(mons[i].eccsdt < mons[dim.nfrag+i].eccsdt) {
