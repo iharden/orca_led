@@ -19,11 +19,11 @@
 
 #include <boost/algorithm/string.hpp>
 
-#include "/home/iharden/fmt-8.0.1/include/fmt/format.h"
-#include "/home/iharden/fmt-8.0.1/include/fmt/core.h"
-#include "/home/iharden/fmt-8.0.1/include/fmt/format-inl.h"
-#include "/home/iharden/fmt-8.0.1/include/fmt/printf.h"
-#include "/home/iharden/fmt-8.0.1/include/fmt/ostream.h"
+#include "fmt/format.h"
+#include "fmt/core.h"
+#include "fmt/format-inl.h"
+#include "fmt/printf.h"
+#include "fmt/ostream.h"
 
 #include "class_monomer.hpp"
 #include "class_dimer.hpp"
