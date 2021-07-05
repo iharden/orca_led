@@ -14,7 +14,7 @@ To include the geometric preparation it needs DLPNO-CCSD(T) calculations of the 
 
 The program produces an output file `basename.led` and a `basename.csv` file that can be opend with e.g. Microsoft Excel.
 
-Example output files can be found at [blub](examples/). 
+Example output files can be found at [examples](examples/). 
 
 Snippet:
 ```
