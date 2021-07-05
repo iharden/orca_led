@@ -1,0 +1,194 @@
+                  ************************************************************** 
+                  ***                                                        *** 
+                  ***                        ORCA_LED                        *** 
+                  ***                       v1.0 01/21                       *** 
+                  ***                       v1.1 06/21                       *** 
+                  ***                       by iharden                       *** 
+                  ***                                                        *** 
+                  ************************************************************** 
+
+
+*** 
+The purpose of this little program is to facilitate the LED analysis as implemented in ORCA 
+ORCA_LED does not help you with the calculations. It works only with ORCA output files 
+Its main purpose is to print the essential results of LED + it performs the decomposition of the interaction energy 
+However, it might be useful when you want to compare the outcomes of many LED analyzes 
+
+
+*** 
+Some general remarks:
+Without using the compare-mode (--compare) I will only calculate the interaction energies 
+To include the electronic preparation I need DLPNO-CCSD(T) calculations of the fragments in the dimer geometry 
+To include the geometric preparation I need DLPNO-CCSD(T) calculations of the fragments in their equilibrium geometries 
+Type 'orca_led --help' to get a list of options and some command line examples 
+
+
+
+
+Program was started at Mon Jul  5 10:16:16 2021 CEST
+
+Name of Dimer-file 
+   endo.mpi8.out 
+
+******* GENERAL INFORMATION ABOUT THE DIMER SYSTEM ******* 
+
+nel:               86 
+nbasis:           420 
+nfragment:          2 
+HFType:           RHF 
+
+******* OVERALL ENERGIES ******* 
+
+E(HF):          -570.17746 
+E(Ref):         -570.17746 
+E(CCSD):        -572.32448 
+E(CCSD(T)):     -572.43223 
+E(CORR):        -2.14702 
+E(Triples):     -0.10776 
+
+******* DECOMPOSITION OF HARTREE-FOCK REFERENCE ENERGY ******* 
+
+E(HF) for Fragment 1:                                                  -192.35466 
+E(HF) for Fragment 2:                                                  -377.06253 
+
+Electrostatic Interaction between fragments 2 and 1:                   -0.55525 
+
+Exchange Interaction between fragments 2 and 1:                        -0.20502 
+
+Consistency check:
+Total Reference energy:                                                -570.17746 
+Sum of the fragments HF reference and interaction energies:            -570.17746 
+
+
+
+
+******* DECOMPOSITION OF INTRA-EXCITATIONS ******* 
+
+                                        Fragment 1    Fragment 2    
+
+Intra strong pairs                      -0.80266      -1.26127      
+Intra triples                           -0.03691      -0.05581      
+Intra weak pairs                        -0.00066      -0.00121      
+Intra singles                           0.00000       -0.00000      
+
+
+
+
+******* INTERACTION ENERGIES BETWEEN FRAGMENTS ******* 
+
+Warning: To calculate the percentages the absolute amount of the energies was used! 
+
+                                                                       HFint      %     CCint      %     
+Interaction between fragments 2 and 1:                                 -0.76027   88.8  -0.09625   11.2  
+
+
+
+
+******* DECOMPOSITION OF CCSD-DISPERSION ******* 
+
+Dispersion (strong pairs) between fragments 2 and 1:                   -0.02966 
+
+Dispersion (weak pairs) between fragments 2 and 1:                     -0.00107 
+
+Sum of CCSD dispersion terms:                                          -0.03073 
+
+
+
+
+******* TRIPLES CORRECTION TO DISPERSION ******* 
+
+gamma (Disp(SP)/Inter(SP)) between fragments 2 and 1:                  0.37006 
+
+Triples correction to Dispersion between fragments 2 and 1:            -0.00557 
+
+
+
+
+******* DECOMPOSITION OF CCSD-NONDISPERSION ******* 
+
+Warning: NonDisp (Strong Pairs) includes Singles excitations! 
+Sum of Nondispersion(strong pairs):                                    -2.11442 
+Sum of Nondispersion(weak pairs):                                      -0.00187 
+Sum of Nondispersion terms:                                            -2.11629 
+
+
+
+
+************************************************************** 
+******* I will start now with the Interaction Energies ******* 
+************************************************************** 
+
+You gave me 4 monomer files and 2 fragments are present in the Dimer-file! 
+Name of Dimer-file 
+   endo.mpi8.out 
+
+Name of Monomer-files 
+   frag1.mpi8.out 
+   frag2.mpi8.out 
+   frag1_opt.mpi8.out 
+   frag2_opt.mpi8.out 
+                              Dimer         Monomer  1    Monomer  2    
+
+E(HF):                        -570.17746    -192.82774    -377.35513    
+E(CCSD):                      -572.32448    -193.65822    -378.64950    
+E(CCSD(T)):                   -572.43223    -193.69929    -378.71098    
+E(CORR):                      -2.14702      -0.83048      -1.29437      
+E(Triples):                   -0.10776      -0.04107      -0.06147      
+
+I will calculate the geometric and the electronic preparation 
+
+If not stated otherwise, energies from now on are in kcal/mol !!! 
+
+
+
+******* Geometric preparation energy ******* 
+
+Geometric preparation for Fragment 1:                                  13.40991 
+Geometric preparation for Fragment 2:                                  8.01998 
+Sum:                                                                   21.42989 
+
+
+
+******* HF-Interaction energy ******* 
+
+Electronic preparation for Fragment 1:                                 296.86135 
+Electronic preparation for Fragment 2:                                 183.61209 
+Sum:                                                                   480.47344 
+
+Electrostatic Interaction between fragments 2 and 1:                   -348.42518 
+Exchange Interaction between fragments 2 and 1:                        -128.65306 
+
+Consistency check:
+Total HF interaction energy:                                           3.39520 
+Sum of elec.preparation/electrostatic- and exchange Interaction:       3.39520 
+
+******* CCSD Interaction energy ******* 
+
+Warning: NonDisp (Strong Pairs) includes Singles excitations! 
+Total Nondispersion interaction energy:                                5.37386 
+Total Dispersion interaction energy:                                   -19.28184 
+
+******* Triples Interaction energy ******* 
+
+Total Triples interaction energy:                                      -3.26945 
+
+Consistency check:
+Total interaction energy (with geometric preparation):                 7.64715 
+Sum of all mentioned interaction terms:                                7.64767 
+
+
+
+
+************************************************************** 
+*******                    Summary                     ******* 
+************************************************************** 
+
+E(Geo-prep)                                                            21.42989 
+E(HF)_int                                                              3.39520 
+E(NonDisp)_int                                                         5.37386 
+E(Disp)                                                                -19.28184 
+E(Triples)_int                                                         -3.26945 
+E(Ges)_int                                                             7.64767 
+
+
+Total computation time: 15.74644 ms

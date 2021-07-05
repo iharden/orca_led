@@ -1,0 +1,59 @@
+name:, endo.mpi8.out 
+nel:,              86 
+nbasis:,          420 
+nfragment:,         2 
+HFType:, RHF 
+
+E(HF):,         -570.17746 
+E(Ref):,        -570.17746 
+E(CCSD):,       -572.32448 
+E(CCSD(T)):,    -572.43223 
+E(CORR):,       -2.14702 
+E(Triples):,    -0.10776 
+
+E(HF)_1:,       -192.35466 
+E(HF)_2:,       -377.06253 
+
+ElStat_2_1:,    -0.55525 
+Exchange_2_1:,  -0.20502 
+
+IntraSP_1:,     -0.80266 
+IntraTrip_1:,   -0.03691 
+IntraWP_1:,     -0.00066 
+IntraSing_1:,   0.00000 
+IntraSP_2:,     -1.26127 
+IntraTrip_2:,   -0.05581 
+IntraWP_2:,     -0.00121 
+IntraSing_2:,   -0.00000 
+
+DispSP_2_1:,    -0.02966 
+DispWP_2_1:,    -0.00107 
+SumDisp:,       -0.03073 
+
+DispTrip_2_1:,  -0.00557 
+
+NonDispSP:,     -2.11442 
+NonDispWP:,     -0.00187 
+NonDispSum:,    -2.11629 
+
+GeoPrep_1:,          13.40991 
+GeoPrep_2:,          8.01998 
+
+ElPrep_1:,           296.86135 
+ElPrep_2:,           183.61209 
+ElStat_2_1:,         -348.42518 
+Exchange_2_1:,       -128.65306 
+HFint:;              3.39520 
+
+NonDisp_int:,        5.37386 
+Disp_int:,           -19.28184 
+
+Triples_int:,        -3.26945 
+
+Total_int:,          7.64715 
+E(Geo-prep),         21.42989 
+E(HF)_int,           3.39520 
+E(NonDisp)_int,      5.37386 
+E(Disp),             -19.28184 
+E(Triples)_int,      -3.26945 
+E(Ges)_int,          7.64767 
