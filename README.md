@@ -2,7 +2,7 @@
                   ************************************************************** 
                   ***                                                        *** 
                   ***                        ORCA_LED                        *** 
-                  ***                      iharden 01/21                     *** 
+                  ***                      iharden 07/21                     *** 
                   ***                                                        *** 
                   ***                                                        *** 
                   ************************************************************** 
@@ -18,8 +18,7 @@ To include the electronic preparation I need DLPNO-CCSD(T) calculations of the f
 To include the geometric preparation I need DLPNO-CCSD(T) calculations of the fragments in their equilibrium geometries 
 Type 'orca_led --help' to get a list of options and some command line examples 
 
-Installation: In /binaries there are precompiled binaries for Ubuntu and Windows 10. For Windows 10 fmt.dll is needed at runtime. 
-fmt.dll is provided in /binaries as well
+Installation: In /binaries there are precompiled binaries for Ubuntu and Windows 10. 
 
-The source files can easily be compiled by yourself. However, orca_led makes use of third party libraries (boost and fmt), so both libraries
-need to be installed properly and the include paths need to be set in the appropriate manner.
+(The source files can easily be compiled by yourself. However, orca_led makes use of third party libraries (boost and fmt), so both libraries
+need to be installed properly and the include paths need to be set in the appropriate manner.)
