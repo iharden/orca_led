@@ -15,13 +15,15 @@
 #include <algorithm>
 #include <map>
 #include <chrono>
+#include <tuple>
 
 #include <boost/algorithm/string.hpp>
 
-#include <fmt/core.h>
-#include <fmt/format.h>
-#include <fmt/printf.h>
-#include <fmt/ostream.h>
+#include "/home/iharden/fmt-8.0.1/include/fmt/format.h"
+#include "/home/iharden/fmt-8.0.1/include/fmt/core.h"
+#include "/home/iharden/fmt-8.0.1/include/fmt/format-inl.h"
+#include "/home/iharden/fmt-8.0.1/include/fmt/printf.h"
+#include "/home/iharden/fmt-8.0.1/include/fmt/ostream.h"
 
 #include "class_monomer.hpp"
 #include "class_dimer.hpp"
@@ -50,4 +52,9 @@ void do_ccsdint(const Dimer& dim, std::vector<Monomer>& mon, std::ostream& os, s
 void do_triplesint(const Dimer& dim, std::vector<Monomer>& mon, std::ostream& os, std::map<std::string,double>& summary, std::vector<std::string>& insertOrder, std::ostream& csv);
 void do_consistency(const Dimer& dim, std::vector<Monomer>& mon, std::ostream& os, std::map<std::string,double>& summary, std::vector<std::string>& insertOrder, std::ostream& csv);
 void do_summary(std::ostream& os, std::map<std::string,double>& summary, std::vector<std::string>& insertOrder, std::ostream& csv);
+
+// FUNCTIONS CALLED IN DO_COMPARE(COMPFILES)
+std::tuple<std::vector<std::string>,std::vector<std::string>> do_startup(const std::vector<std::string>& comps, std::ostream& os);
+bool check_geoprep(const std::vector<std::string>& v1, const std::vector<std::string>& v2);
+void do_comparison(const std::vector<std::string>& v1, const std::vector<std::string>& v2, bool geoprepflag, std::ostream& os, std::ostream& csv);
 #endif /* FUNCTIONS_HPP_ */

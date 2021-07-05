@@ -56,12 +56,12 @@ Dimer::Dimer(string argv) {
 	}
 
 	// NUMBER OF BASIS FUNCTIONS
-	s = "of contracted basis functions";
+	s = "Number of basis functions";
 	for(string line:file) {
 		found = line.find(s);
 		if(found!=string::npos) {
 			split(res, line, is_any_of(" "), token_compress_on);
-			nbasis=stoi(res[7]);
+			nbasis=stoi(res[5]);
 			break;
 		}
 	}
@@ -208,7 +208,7 @@ Dimer::Dimer(string argv) {
 			if(hftype=="RHF")
 				s = str(format("Interaction correlation for Fragments   %1% and   %2%:") % i % j );
 			else if(hftype=="UHF")
-				s = str(format("Interaction correlation for Fragments   %1% and  %2%:") % i % j );S
+				s = str(format("Interaction correlation for Fragments   %1% and  %2%:") % i % j );
 			else
 				throw runtime_error("Unknown HFType");
 

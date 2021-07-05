@@ -60,127 +60,24 @@ void do_led(const Dimer& dim, vector<Monomer>& mons, ostream& os, ostream& csv) 
 }
 
 void do_compare(const vector<string> comps, ostream& os, ostream& csv) {
-	if(comps.size()!=2) {
-		cout << "You have to specify exactly two .led files \n";
-		throw runtime_error("Number of arguments is wrong");
-	}
-
-	ifstream f1{comps[0]};
-	ifstream f2{comps[1]};
-
-	if(!f1 || !f2)
-		throw runtime_error("do_compare():File not found");
 
 	print_header(os);
-
-	fmt::fprintf(os, "\n");
-	fmt::fprintf(os, "Name of files \n");
-	for(size_t i=0;i<comps.size();++i) {
-		fmt::fprintf(os, "   %-s \n", comps[i]);
-	}
-	fmt::fprintf(os, "\n");
-
-
-	vector<string> v1{}, v2{}, res{};
-	vector<string> insertOrder{};
-	string s{}, line{};
-
-	while(getline(f1, s))
-		v1.push_back(s);
-
-	while(getline(f2, s))
-		v2.push_back(s);
-
-
-	size_t found{};
-
-	s="E(Geo-prep)";
-	vector<bool> geoprep{false,false};
-	for(string line:v1) {
-		found=line.find(s);
-		if(found!=string::npos) {
-			geoprep[0]=true;
-			break;
-		}
-	}
-
-	for(string line:v2) {
-		found=line.find(s);
-		if(found!=string::npos) {
-			geoprep[1]=true;
-			break;
-		}
-	}
-
-	if(geoprep[0] != geoprep[1]) {
-		cerr << "*** \n";
-		cerr << "WARNING: E(GEO-PREP) is present in one file but not in the other \n";
-		cerr << "Please repeat the LED analysis and be consistent this time \n";
-		cerr << "I will abbort \n";
-		cerr << "*** \n";
-		cerr << " \n";
-		throw runtime_error("do_compare():Inconsistency found");
-	}
-
-
-	int nvalue{};
-	if(geoprep[0]==false)
-		nvalue=5;
-	else
-		nvalue=6;
-
-	map<string, double> sum1{}, sum2{};
-	s="Summary";
-	for(size_t i=0;i<v1.size();++i) {
-		line=v1[i];
-		found=line.find(s);
-		if(found!=string::npos) {
-			for(int j=0;j<nvalue;++j) {
-				line=v1[i+3+j];
-				split(res, line, is_any_of(" "), token_compress_on);
-				sum1[res[0]]=stod(res[1]);
-				insertOrder.push_back(res[0]);
-
-			}
-			break;
-		}
-	}
-
-	for(size_t i=0;i<v2.size();++i) {
-		line=v2[i];
-		found=line.find(s);
-		if(found!=string::npos) {
-			for(int j=0;j<nvalue;++j) {
-				line=v2[i+3+j];
-				split(res, line, is_any_of(" "), token_compress_on);
-				sum2[res[0]]=stod(res[1]);
-			}
-			break;
-		}
-	}
-
-	fmt::fprintf(os, "%-50s %12s %12s %12s \n", " ", "File 1", "File 2", "Difference");
-	fmt::fprintf(csv, "%-50s %12s %12s %12s \n", " ,", "File 1,", "File 2,", "Difference");
-	fmt::fprintf(os, "\n");
-	for(size_t i=0;i<insertOrder.size();++i) {
-		line=insertOrder[i];
-		fmt::fprintf(os, fs7, line, sum1[line], sum2[line], sum2[line]-sum1[line]);
-		fmt::fprintf(csv, fs8, line, sum1[line], sum2[line], sum2[line]-sum1[line]);
-	}
-
-	fmt::fprintf(os, "\n");
-	fmt::fprintf(os, "\n");
+	auto [v1,v2] = do_startup(comps,os);
+	bool geoprepflag = check_geoprep(v1,v2);
+	do_comparison(v1,v2,geoprepflag,os,csv);
 }
 
 void print_header(ostream& os) {
+
 	time_t t = time(0);
 	tm* now=localtime(&t);
 
 	fmt::fprintf(os, "                  ************************************************************** \n");
 	fmt::fprintf(os, "                  ***                                                        *** \n");
 	fmt::fprintf(os, "                  ***                        ORCA_LED                        *** \n");
-	fmt::fprintf(os, "                  ***                      iharden 01/21                     *** \n");
-	fmt::fprintf(os, "                  ***                                                        *** \n");
+	fmt::fprintf(os, "                  ***                       v1.0 01/21                       *** \n");
+	fmt::fprintf(os, "                  ***                       v1.1 06/21                       *** \n");
+	fmt::fprintf(os, "                  ***                       by iharden                       *** \n");
 	fmt::fprintf(os, "                  ***                                                        *** \n");
 	fmt::fprintf(os, "                  ************************************************************** \n");
 	fmt::fprintf(os, "\n");
@@ -627,7 +524,7 @@ void do_generalinfo(const Dimer& dim, vector<Monomer>& mons, ostream& os) {
 		for(int i=0;i<dim.nfrag;++i) {
 			if(mons[i].nbasis != mons[dim.nfrag+i].nbasis) {
 				tmp = fmt::format("Number of basis functions for fragment {} does not match. Either you specified the files in the wrong order "
-						"or your calculations were not carried out at the same level. I will abort \n", i);
+						"or your calculations were not carried out at the same level. I will abort \n", i+1);
 				fmt::fprintf(cerr, tmp);
 				fmt::fprintf(os, tmp);
 
@@ -638,7 +535,7 @@ void do_generalinfo(const Dimer& dim, vector<Monomer>& mons, ostream& os) {
 
 			if(mons[i].nel != mons[dim.nfrag+i].nel) {
 				tmp = fmt::format("Number of electrons for fragment {} does not match. Either you specified the files in the wrong order "
-						"or your calculations were not carried out at the same level. I will abort", i);
+						"or your calculations were not carried out at the same level. I will abort", i+1);
 				fmt::fprintf(cerr, tmp);
 				fmt::fprintf(os, tmp);
 				throw runtime_error("Wrong number of electrons");
@@ -679,6 +576,7 @@ void do_geoprep(const Dimer& dim, vector<Monomer>& mons, ostream& os, map<string
 			tmp=fmt::format("GeoPrep_{}:,", i+1);
 			fmt::fprintf(csv, fs6, tmp, (mons[i].eccsdt-mons[dim.nfrag+i].eccsdt)*CF);
 		}
+		fmt::fprintf(os, fs5, "Sum:", sum);
 		summary["E(Geo-prep)"]=sum;
 		insertOrder.push_back("E(Geo-prep)");
 
@@ -698,12 +596,15 @@ void do_hfint(const Dimer& dim, vector<Monomer>& mons, ostream& os, map<string, 
 	fmt::fprintf(os, "******* HF-Interaction energy ******* \n");
 	fmt::fprintf(os, "\n");
 	for(int i=0;i<dim.nfrag;++i) {
+		sum+=(dim.fragehf[i]-mons[i].ehf)*CF;
 		tmp=fmt::format("Electronic preparation for Fragment {}:", i+1);
 		fmt::fprintf(os, fs5, tmp, (dim.fragehf[i]-mons[i].ehf)*CF);
-
 		tmp=fmt::format("ElPrep_{}:,", i+1);
 		fmt::fprintf(csv, fs6, tmp, (dim.fragehf[i]-mons[i].ehf)*CF);
 	}
+	fmt::fprintf(os, fs5, "Sum:", sum);
+	fmt::fprintf(os, "\n");
+
 	for(int i=2;i<=dim.nfrag;++i) {
 		for(int j=1;j<i;++j) {
 			tmp=fmt::format("Electrostatic Interaction between fragments {} and {}:", i, j);
@@ -714,6 +615,7 @@ void do_hfint(const Dimer& dim, vector<Monomer>& mons, ostream& os, map<string, 
 			++N;
 		}
 	}
+
 	N=0;
 	for(int i=2;i<=dim.nfrag;++i) {
 		for(int j=1;j<i;++j) {
@@ -841,6 +743,137 @@ void do_summary(ostream& os, map<string, double>& summary, vector<string>& inser
 		tmp=insertOrder[i];
 		fmt::fprintf(os, fs5, tmp, summary[tmp]);
 		fmt::fprintf(csv, fs6, tmp+",", summary[tmp]);
+	}
+
+	fmt::fprintf(os, "\n");
+	fmt::fprintf(os, "\n");
+}
+
+tuple<vector<string>,vector<string>> do_startup(const vector<string>& comps, ostream& os) {
+
+	if(comps.size()!=2) {
+		cout << "You have to specify exactly two .led files \n";
+		throw runtime_error("Number of arguments is wrong");
+	}
+
+	ifstream f1{comps[0]};
+	ifstream f2{comps[1]};
+
+	if(!f1 || !f2)
+		throw runtime_error("do_compare():File not found");
+
+	fmt::fprintf(os, "\n");
+	fmt::fprintf(os, "Name of files \n");
+	for(size_t i=0;i<comps.size();++i) {
+		fmt::fprintf(os, "   %-s \n", comps[i]);
+	}
+	fmt::fprintf(os, "\n");
+
+
+	vector<string> v1{}, v2{};
+	string s{};
+
+	while(getline(f1, s))
+		v1.push_back(s);
+
+	while(getline(f2, s))
+		v2.push_back(s);
+
+	return make_tuple(v1,v2);
+}
+
+bool check_geoprep(const std::vector<std::string>& v1, const std::vector<std::string>& v2) {
+
+	size_t found{};
+	string s="E(Geo-prep)";
+	vector<bool> geoprep{false,false};
+	for(string line:v1) {
+		found=line.find(s);
+		if(found!=string::npos) {
+			geoprep[0]=true;
+			break;
+		}
+	}
+
+	for(string line:v2) {
+		found=line.find(s);
+		if(found!=string::npos) {
+			geoprep[1]=true;
+			break;
+		}
+	}
+
+	if(geoprep[0] != geoprep[1]) {
+		cerr << "*** \n";
+		cerr << "WARNING: E(GEO-PREP) is present in one file but not in the other \n";
+		cerr << "Please repeat the LED analysis and be consistent this time \n";
+		cerr << "I will abbort \n";
+		cerr << "*** \n";
+		cerr << " \n";
+		throw runtime_error("do_compare():Inconsistency found");
+	}
+
+	bool geoprepflag;
+	if(geoprep[0]==true)
+		geoprepflag=true;
+	else
+		geoprepflag=false;
+
+	return geoprepflag;
+}
+
+void do_comparison(const vector<string>& v1, const vector<string>& v2, bool geoprepflag, ostream& os, ostream& csv) {
+
+
+	int nvalue{};
+	size_t found{};
+	if(geoprepflag==false)
+		nvalue=5;
+	else
+		nvalue=6;
+
+	map<string, double> sum1{}, sum2{};
+	string s{}, line{};
+
+	vector<string> res{};
+	vector<string> insertOrder{};
+
+	s="Summary";
+	for(size_t i=0;i<v1.size();++i) {
+		line=v1[i];
+		found=line.find(s);
+		if(found!=string::npos) {
+			for(int j=0;j<nvalue;++j) {
+				line=v1[i+3+j];
+				split(res, line, is_any_of(" "), token_compress_on);
+				sum1[res[0]]=stod(res[1]);
+				insertOrder.push_back(res[0]);
+
+			}
+			break;
+		}
+	}
+
+	for(size_t i=0;i<v2.size();++i) {
+		line=v2[i];
+		found=line.find(s);
+		if(found!=string::npos) {
+			for(int j=0;j<nvalue;++j) {
+				line=v2[i+3+j];
+				split(res, line, is_any_of(" "), token_compress_on);
+				sum2[res[0]]=stod(res[1]);
+			}
+			break;
+		}
+	}
+
+	fmt::fprintf(os, "%-50s %12s %12s %12s \n", " ", "File 1", "File 2", "Difference");
+	fmt::fprintf(csv, "%-50s %12s %12s %12s \n", " ,", "File 1,", "File 2,", "Difference");
+	fmt::fprintf(os, "\n");
+	for(size_t i=0;i<insertOrder.size();++i) {
+		line=insertOrder[i];
+		fmt::fprintf(os, fs7, line, sum1[line], sum2[line], sum2[line]-sum1[line]);
+		fmt::fprintf(csv, fs8, line, sum1[line], sum2[line], sum2[line]-sum1[line]);
 	}
 
 	fmt::fprintf(os, "\n");

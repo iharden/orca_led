@@ -23,6 +23,7 @@ Monomer::Monomer(string argv) {
 	string s{};
 	vector<string> res{};
 	size_t found{};
+
 	while(getline(monomer, s))
 		file.push_back(s);
 
@@ -38,12 +39,12 @@ Monomer::Monomer(string argv) {
 	}
 
 	// NUMBER OF BASIS FUNCTIONS
-	s = "of contracted basis functions";
+	s = "Number of basis functions";
 	for(string line:file) {
 		found = line.find(s);
 		if(found!=string::npos) {
 			split(res, line, is_any_of(" "), token_compress_on);
-			nbasis=stoi(res[7]);
+			nbasis=stoi(res[5]);
 			break;
 		}
 	}
