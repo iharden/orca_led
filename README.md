@@ -17,8 +17,10 @@ You can just download the executables and use them right away.
 
 
 ## Usage
-`orca_led --help` prints a help message
+`orca_led --help` prints a help message.
+
 `orca_led --dimer example.out --monomers <list of monomers out files>` standard use for decomposting interaction energies.
+
 `orca_led --compare file1.led file2.led` compares two .led files and calculates the differences of the interaction energies.
 
 ## Requirements
