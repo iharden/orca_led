@@ -28,6 +28,7 @@ public:
 	double eccsdt = 0;
 	double ecorr = 0;
 	double et = 0;
+	double ecorrt = 0;
 
 	Monomer() = delete;
 	Monomer(std::string argv);

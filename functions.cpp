@@ -42,6 +42,9 @@ void do_led(const Dimer& dim, ostream& os, ostream& csv) {
 	do_ccsddisp(dim, os, csv);
 	do_triplesdisp(dim, os, csv);
 	do_ccsdnondisp(dim, os, csv);
+	do_triplesnondisp(dim, os, csv);
+	if(dim.delocalizedstrongpairs != 0 || dim.delocalizedtriples != 0)
+		do_delocalized(dim, os, csv);
 }
 
 void do_led(const Dimer& dim, vector<Monomer>& mons, ostream& os, ostream& csv) {
@@ -51,10 +54,56 @@ void do_led(const Dimer& dim, vector<Monomer>& mons, ostream& os, ostream& csv) 
 
 	do_led(dim, os, csv);
 	do_generalinfo(dim, mons, os);
+	do_approachone(dim, mons, os, summary, insertOrder, csv);
+	do_approachtwo(dim, mons, os, summary, insertOrder, csv);
+}
+
+void do_approachone(const Dimer& dim, vector<Monomer>& mons, ostream& os, map<string, double>& summary, vector<string>& insertOrder, ostream& csv) {
+
+	fmt::fprintf(os, "************************************************************** \n");
+	fmt::fprintf(os, "*******                Approach ONE                    ******* \n");
+	fmt::fprintf(os, "************************************************************** \n");
+
+	fmt::fprintf(os, "\n");
+	fmt::fprintf(os, "\n");
+	fmt::fprintf(os, "\n");
+
+	fmt::fprintf(csv, "Binding energies \n");
+	fmt::fprintf(csv, "Approach ONE \n");
+	fmt::fprintf(csv, "\n");
 	do_geoprep(dim, mons, os, summary, insertOrder, csv);
 	do_hfint(dim, mons, os, summary, insertOrder, csv);
 	do_ccsdint(dim, mons, os, summary, insertOrder, csv);
 	do_triplesint(dim, mons, os, summary, insertOrder, csv);
+	do_consistency(dim, mons, os, summary, insertOrder, csv);
+	do_summary(os, summary, insertOrder, csv);
+	fmt::fprintf(os, "\n");
+	fmt::fprintf(os, "\n");
+	fmt::fprintf(os, "\n");
+}
+
+void do_approachtwo(const Dimer& dim, vector<Monomer>& mons, ostream& os, map<string, double>& summary, vector<string>& insertOrder, ostream& csv) {
+
+	fmt::fprintf(os, "************************************************************** \n");
+	fmt::fprintf(os, "*******                Approach TWO                    ******* \n");
+	fmt::fprintf(os, "************************************************************** \n");
+
+	fmt::fprintf(os, "\n");
+	fmt::fprintf(os, "\n");
+	fmt::fprintf(os, "\n");
+
+	fmt::fprintf(csv, "Approach TWO \n");
+	fmt::fprintf(csv, "\n");
+	summary.clear();
+	insertOrder.clear();
+
+	do_geoprep(dim, mons, os, summary, insertOrder, csv);
+	do_elprep(dim, mons, os, summary, insertOrder, csv);
+	do_refint(dim, mons, os, summary, insertOrder, csv);
+	do_dispint(dim, mons, os, summary, insertOrder, csv);
+	do_nondispint(dim, mons, os, summary, insertOrder, csv);
+	if(dim.delocalizedstrongpairs != 0 || dim.delocalizedtriples != 0)
+		do_delocalized(dim, mons, os, summary, insertOrder, csv);
 	do_consistency(dim, mons, os, summary, insertOrder, csv);
 	do_summary(os, summary, insertOrder, csv);
 }
@@ -92,7 +141,7 @@ void print_header(ostream& os) {
 	fmt::fprintf(os, "*** \n");
 	fmt::fprintf(os, "Some general remarks:");
 	fmt::fprintf(os, "\n");
-	fmt::fprintf(os, "Without using the compare-mode (--compare) I will only calculate the interaction energies \n");
+	fmt::fprintf(os, "Without using the compare-mode (--compare) I will only calculate and decompose the interaction energies \n");
 	fmt::fprintf(os, "To include the electronic preparation I need DLPNO-CCSD(T) calculations of the fragments in the dimer geometry \n");
 	fmt::fprintf(os, "To include the geometric preparation I need DLPNO-CCSD(T) calculations of the fragments in their equilibrium geometries \n");
 	fmt::fprintf(os, "Type 'orca_led --help' to get a list of options and some command line examples \n");
@@ -135,9 +184,12 @@ void do_hartreefock(const Dimer& dim, ostream& os, ostream& csv) {
 
 	//CHECK IF E(HF) AND E(REF) ARE EQUAL
 	if(abs(dim.ehf-dim.eref) > 0.0001) {
-		fmt::fprintf(os, "WARNING: The Hartree-Fock energy (E(HF)) differs from the HF-Reference energy E(Ref) used in LED! \n");
-		fmt::fprintf(os, "Typically, this happens because LED makes use of RI-JK while the initial HF calculation might not \n");
-		fmt::fprintf(os, "I will print both energies but for the consistency check I am using E(Ref) \n");
+		fmt::fprintf(os, "*****************************************************************************************************\n");
+		fmt::fprintf(os, "WARNING: The Hartree-Fock energy (E(HF)) differs from the HF-Reference energy E(Ref) used in LED! ***\n");
+		fmt::fprintf(os, "Typically, this happens because LED makes use of RI-JK while the initial HF calculation might not ***\n");
+		fmt::fprintf(os, "I will print both energies but for the consistency check I am using E(Ref)                        ***\n");
+		fmt::fprintf(os, "Check your results carefully!                                                                     ***\n");
+		fmt::fprintf(os, "*****************************************************************************************************\n");
 		fmt::fprintf(os, "\n");
 	}
 
@@ -279,28 +331,23 @@ void do_inter(const Dimer& dim, std::ostream& os, ostream& csv) {
 	fmt::fprintf(os, "Warning: To calculate the percentages the absolute amount of the energies was used! \n");
 	fmt::fprintf(os, "\n");
 
-	// Calculate HF-Interaction
-	vector<double> hfint{};
-	for(size_t i=0;i<dim.fraghfJ.size();++i)
-		hfint.push_back(dim.fraghfJ[i]+dim.fraghfK[i]);
-
-	// Calculate CC-Interaction
-	vector<double> ccint{};
-	for(size_t i=0;i<dim.fragInterstrong.size();++i)
-		ccint.push_back(dim.fragInterstrong[i]+dim.fragInterweak[i]+dim.fragIntertriples[i]);
-
-
 	string fs9="%-70s %-10.5f %-5.1f %-10.5f %-5.1f \n";
 	fmt::fprintf(os, "%-70s %-10s %-5s %-10s %-5s \n", " ", "HFint", "%", "CCint", "%");
+
+	// Calculate Total Interaction
+	vector<double> totint{};
+	for(size_t i=0;i<dim.hfint.size();++i) {
+		totint.push_back(dim.hfint[i] + dim.ccint[i]);
+	}
 
 	int N=0;
 	double percent=0;
 
 	for(int i=2;i<=dim.nfrag;++i) {
 		for(int j=1;j<i;++j) {
-			percent=abs(hfint[N])/(abs(ccint[N])+abs(hfint[N])) * 100;
+			percent=abs(dim.hfint[N])/(abs(dim.ccint[N])+abs(dim.hfint[N])) * 100;
 			tmp=fmt::format("Interaction between fragments {} and {}:", i, j);
-			fmt::fprintf(os, fs9, tmp, hfint[N], percent, ccint[N], 100-percent);
+			fmt::fprintf(os, fs9, tmp, dim.hfint[N], percent, dim.ccint[N], 100-percent);
 
 			/*tmp=fmt::format("TotalInt_{}_{}:,", i, j);
 			fmt::fprintf(csv, fs4, tmp, dim.fragccDispstrong[N]); */
@@ -308,6 +355,37 @@ void do_inter(const Dimer& dim, std::ostream& os, ostream& csv) {
 		}
 	}
 	fmt::fprintf(os, "\n");
+
+	os << "\n";
+	os << "\n";
+	// Print Interaction Map
+	fmt::fprintf(os, "Total Interaction Map: \n");
+	os << "\n";
+	os << fixed;
+	os << left << setw(40) << " ";
+	for(int i=0;i<dim.nfrag;++i) {
+		os << left << setw(9) << "Fragment" << setw(5) << i+1;
+	}
+	os << "\n";
+	os << "\n";
+
+	N=0;
+	for(int i=1;i<=dim.nfrag;++i) {
+		os << left << setw(9) << "Fragment" << setw(31) << i;
+		for(int j=1;j<=dim.nfrag;++j) {
+			if(i==j)
+				os << left << setw(14) <<  setprecision(5) << 0.00000;
+			else if(j<i)
+				os << left << setw(14) <<  setprecision(5) << " ";
+			else {
+				os << left << setw(14) << setprecision(5) << totint[N];
+				tmp=fmt::format("TotalInt_{}_{}:,", i, j);
+				fmt::fprintf(csv, fs4, tmp, totint[N]);
+				++N;
+			}
+		}
+		os << endl;
+	}
 }
 
 
@@ -412,6 +490,47 @@ void do_ccsdnondisp(const Dimer& dim, std::ostream& os, ostream& csv) {
 	fmt::fprintf(csv, "\n");
 }
 
+void do_triplesnondisp(const Dimer& dim, std::ostream& os, std::ostream& csv) {
+
+	string tmp{};
+	int N=0;
+
+	fmt::fprintf(os, "\n");
+	fmt::fprintf(os, "\n");
+	fmt::fprintf(os, "\n");
+	fmt::fprintf(os, "******* TRIPLES CORRECTION TO NON-DISPERSION ******* \n");
+	fmt::fprintf(os, "\n");
+
+	N=0;
+	for(int i=2;i<=dim.nfrag;++i) {
+		for(int j=1;j<i;++j) {
+			tmp=fmt::format("Triples correction to Non-Dispersion between fragments {} and {}:", i, j);
+			fmt::fprintf(os, fs5, tmp, dim.fragccNonDisptriples[N]);
+
+			tmp=fmt::format("NonDispTrip_{}_{}:,", i, j);
+			fmt::fprintf(csv, fs4, tmp, dim.fragccNonDisptriples[N]);
+			++N;
+		}
+	}
+	fmt::fprintf(os, "\n");
+	fmt::fprintf(csv, "\n");
+}
+
+void do_delocalized(const Dimer& dim, std::ostream& os, std::ostream& csv) {
+
+	fmt::fprintf(os, "\n");
+	fmt::fprintf(os, "\n");
+	fmt::fprintf(os, "\n");
+	fmt::fprintf(os, "******* DELOCALIZED CONTRIBUTIONS ******* \n");
+	fmt::fprintf(os, "\n");
+	fmt::fprintf(os, fs5, "Delocalized term from CCSD strong pairs:", dim.delocalizedstrongpairs);
+	fmt::fprintf(os, fs5, "Delocalized term from Triples:", dim.delocalizedtriples);
+
+	fmt::fprintf(csv, fs4, "DelocalizedSP:,", dim.delocalizedstrongpairs);
+	fmt::fprintf(csv, fs4, "Delocalizedtriples:,", dim.delocalizedtriples);
+	fmt::fprintf(csv,"\n");
+}
+
 void do_generalinfo(const Dimer& dim, vector<Monomer>& mons, ostream& os) {
 
 	string tmp{}, tmpp{};
@@ -445,6 +564,7 @@ void do_generalinfo(const Dimer& dim, vector<Monomer>& mons, ostream& os) {
 	for(size_t i=0;i<mons.size();++i) {
 		fmt::fprintf(os, "   %-s \n", mons[i].name);
 	}
+	fmt::fprintf(os, "\n");
 
 	os << fixed;
 	os << left << setw(30) << " ";
@@ -555,9 +675,20 @@ void do_generalinfo(const Dimer& dim, vector<Monomer>& mons, ostream& os) {
 	fmt::fprintf(os, "If not stated otherwise, energies from now on are in kcal/mol !!! \n");
 	fmt::fprintf(os, "\n");
 	fmt::fprintf(os, "\n");
+	fmt::fprintf(os, "******* IMPORTANT NOTE ******* \n");
+	fmt::fprintf(os, "There are several different ways of how to decompose the binding energy \n");
+	fmt::fprintf(os, "This program uses two different approaches and it will do both approaches by default \n");
+	fmt::fprintf(os, "\n");
+	fmt::fprintf(os, "Approach 1: Calculate Dispersive and Nondispersive interactions only at the DLPNO-CCSD level and treat triples interactions individually \n");
+	fmt::fprintf(os, "Ebind = E_geo_prep + E_el_prep (ref) + E_int_Coloumb (ref) + E_Int_XC (ref) + E_Disp (CCSD) + E_int_nondisp (CCSD) + E_int (C-(T)) \n");
+	fmt::fprintf(os, "Within approach 1 the non-dispersive interaction is NOT decomposed into pairwise interaction terms! \n");
+	fmt::fprintf(os, "\n");
+	fmt::fprintf(os, "Approach 2: Decompose triples interactions into dispersive and non-dispersive contributions. \n");
+	fmt::fprintf(os, "Decompose non-dispersive interactions further in electronic preparation and pairwise fragment interaction terms \n");
+	fmt::fprintf(os, "Ebind = E_geo_prep + E_el_prep + E_int_Coloumb (ref) + E_Int_XC (ref) + E_Disp (CCSD-(T)) + E_int_nondisp (CCSD(T)) \n");
+	fmt::fprintf(os, "\n");
 	fmt::fprintf(os, "\n");
 }
-
 
 void do_geoprep(const Dimer& dim, vector<Monomer>& mons, ostream& os, map<string, double>& summary, vector<string>& insertOrder, ostream& csv) {
 
@@ -565,10 +696,10 @@ void do_geoprep(const Dimer& dim, vector<Monomer>& mons, ostream& os, map<string
 	string tmp{};
 
 	if(mons.size() == 2*dim.nfrag) {
-		fmt::fprintf(os, "******* Geometric preparation energy ******* \n");
+		fmt::fprintf(os, "******* GEOMETRIC PREPARATION ENERGY ******* \n");
 		fmt::fprintf(os, "\n");
 		sum=0.0;
-		for(size_t i=0;i<dim.nfrag;++i) {
+		for(int i=0;i<dim.nfrag;++i) {
 			sum+=(mons[i].eccsdt-mons[dim.nfrag+i].eccsdt)*CF;
 			tmp=fmt::format("Geometric preparation for Fragment {}:", i+1);
 			fmt::fprintf(os, fs5, tmp, (mons[i].eccsdt-mons[dim.nfrag+i].eccsdt)*CF);
@@ -604,6 +735,7 @@ void do_hfint(const Dimer& dim, vector<Monomer>& mons, ostream& os, map<string, 
 	}
 	fmt::fprintf(os, fs5, "Sum:", sum);
 	fmt::fprintf(os, "\n");
+	fmt::fprintf(csv, "\n");
 
 	for(int i=2;i<=dim.nfrag;++i) {
 		for(int j=1;j<i;++j) {
@@ -615,6 +747,8 @@ void do_hfint(const Dimer& dim, vector<Monomer>& mons, ostream& os, map<string, 
 			++N;
 		}
 	}
+	fmt::fprintf(os, "\n");
+	fmt::fprintf(csv, "\n");
 
 	N=0;
 	for(int i=2;i<=dim.nfrag;++i) {
@@ -651,6 +785,201 @@ void do_hfint(const Dimer& dim, vector<Monomer>& mons, ostream& os, map<string, 
 	fmt::fprintf(os, "\n");
 	fmt::fprintf(csv, "\n");
 }
+
+void do_elprep(const Dimer& dim, std::vector<Monomer>& mons, std::ostream& os, std::map<std::string,double>& summary,
+		std::vector<std::string>& insertOrder, std::ostream& csv) {
+
+	string tmp{};
+	double sumref=0.0;
+
+	// HF-PART
+	fmt::fprintf(os, "******* ELECTRONIC PREPARATION OF REFERENCE WAVEFUNCTION ******* \n");
+	fmt::fprintf(os, "\n");
+	for(int i=0;i<dim.nfrag;++i) {
+		sumref+=(dim.fragehf[i]-mons[i].ehf)*CF;
+		tmp=fmt::format("Reference preparation for Fragment {}:", i+1);
+		fmt::fprintf(os, fs5, tmp, (dim.fragehf[i]-mons[i].ehf)*CF);
+		tmp=fmt::format("RefPrep_{}:,", i+1);
+		fmt::fprintf(csv, fs6, tmp, (dim.fragehf[i]-mons[i].ehf)*CF);
+	}
+	fmt::fprintf(os, fs5, "Sum:", sumref);
+	fmt::fprintf(os, "\n");
+	fmt::fprintf(csv, fs6, "Sum:,", sumref);
+	fmt::fprintf(csv, "\n");
+
+	//CC-PART
+	double sumcorr=0.0;
+	fmt::fprintf(os, "******* ELECTRONIC PREPARATION OF CORRELATION WAVEFUNCTION ******* \n");
+	fmt::fprintf(os, "\n");
+	for(int i=0;i<dim.nfrag;++i) {
+		sumcorr+=(dim.fragIntrages[i]-mons[i].ecorrt)*CF;
+		tmp=fmt::format("Correlation preparation for Fragment {}:", i+1);
+		fmt::fprintf(os, fs5, tmp, (dim.fragIntrages[i]-mons[i].ecorrt)*CF);
+		tmp=fmt::format("CorrPrep_{}:,", i+1);
+		fmt::fprintf(csv, fs6, tmp, (dim.fragIntrages[i]-mons[i].ecorrt)*CF);
+		}
+	fmt::fprintf(os, fs5, "Sum:", sumcorr);
+	fmt::fprintf(os, "\n");
+	fmt::fprintf(csv, fs6, "Sum:,", sumcorr);
+	fmt::fprintf(csv, "\n");
+
+	summary["E(El-prep)"]=(sumref+sumcorr);
+	insertOrder.push_back("E(El-prep)");
+}
+
+
+void do_refint(const Dimer& dim, vector<Monomer>& mons, ostream& os, map<string, double>& summary, vector<string>& insertOrder, ostream& csv) {
+	string tmp{};
+
+	int N=0;
+	double sum=0.0;
+
+	fmt::fprintf(os, "\n");
+	fmt::fprintf(os, "\n");
+	fmt::fprintf(os, "\n");
+	fmt::fprintf(os, "******* HF-INTERACTION ENERGY ******* \n");
+	fmt::fprintf(os, "\n");
+
+	for(int i=2;i<=dim.nfrag;++i) {
+		for(int j=1;j<i;++j) {
+			tmp=fmt::format("Electrostatic Interaction between fragments {} and {}:", i, j);
+			fmt::fprintf(os, fs5, tmp, dim.fraghfJ[N]*CF);
+
+			tmp=fmt::format("ElStat_{}_{}:,", i, j);
+			fmt::fprintf(csv, fs6, tmp, dim.fraghfJ[N]*CF);
+			++N;
+		}
+	}
+	fmt::fprintf(os, "\n");
+	fmt::fprintf(csv, "\n");
+
+	N=0;
+	for(int i=2;i<=dim.nfrag;++i) {
+		for(int j=1;j<i;++j) {
+			tmp=fmt::format("Exchange Interaction between fragments {} and {}:", i, j);
+			fmt::fprintf(os, fs5, tmp, dim.fraghfK[N]*CF);
+
+			tmp=fmt::format("Exchange_{}_{}:,", i, j);
+			fmt::fprintf(csv, fs6, tmp, dim.fraghfK[N]*CF);
+			++N;
+		}
+	}
+	fmt::fprintf(os, "\n");
+	fmt::fprintf(csv, "\n");
+
+	sum=0.0;
+	for(size_t i=0;i<dim.fraghfJ.size();++i) {
+		sum+= dim.fraghfJ[i];
+		sum+= dim.fraghfK[i];
+	}
+
+	summary["E(ref)_int"]=sum*CF;
+	insertOrder.push_back("E(ref)_int");
+	fmt::fprintf(os, fs5, "Sum of electrostatic- and exchange Interaction:", sum*CF);
+	fmt::fprintf(os, "\n");
+	fmt::fprintf(csv, "\n");
+}
+
+void do_dispint(const Dimer& dim, vector<Monomer>& mons, ostream& os, map<string,double>& summary, vector<string>& insertOrder, ostream& csv) {
+
+	fmt::fprintf(os, "\n");
+	fmt::fprintf(os, "\n");
+	fmt::fprintf(os, "\n");
+	fmt::fprintf(os, "******* DISPERSION INTERACTION ENERGY ******* \n");
+	fmt::fprintf(os, "\n");
+	fmt::fprintf(os, "CCSD strong pairs, weak pairs and (T) triples contribute! \n");
+
+	double sumtot{}, sumsp{}, sumwp{}, sumtp{};
+	int N=0;
+	string tmp{};
+
+	for(size_t i=0;i<dim.fragccDispstrong.size();++i) {
+		sumsp += dim.fragccDispstrong[i];
+		sumwp += dim.fragccDispweak[i];
+		sumtp += dim.fragccDisptriples[i];
+	}
+
+	for(int i=2;i<=dim.nfrag;++i) {
+		for(int j=1;j<i;++j) {
+			tmp=fmt::format("Dispersion interaction between fragments {} and {}:", i, j);
+			fmt::fprintf(os, fs5, tmp, (dim.fragccDispges[N])*CF);
+
+			tmp=fmt::format("DispInt_{}_{}:,", i, j);
+			fmt::fprintf(csv, fs4, tmp, (dim.fragccDispges[N])*CF);
+			++N;
+		}
+	}
+	fmt::fprintf(os, "\n");
+	fmt::fprintf(csv, "\n");
+
+	sumtot = sumsp + sumwp + sumtp;
+	fmt::fprintf(os, fs5, "Total Dispersion (Strong pairs):", sumsp*CF);
+	fmt::fprintf(os, fs5, "Total Dispersion (Weak pairs):", sumwp*CF);
+	fmt::fprintf(os, fs5, "Total Dispersion (Triples):", sumtp*CF);
+	fmt::fprintf(os, fs5, "Total Dispersion (Sum):", sumtot*CF);
+
+	summary["EDisp_int"]=sumtot*CF;
+	insertOrder.push_back("EDisp_int");
+}
+
+void do_nondispint(const Dimer& dim, vector<Monomer>& mons, ostream& os, map<string,double>& summary, vector<string>& insertOrder, ostream& csv) {
+
+	/*
+	 EXY NONDISP = EXY int - EXY DISP (SP,WP,TP) - EXYJ -EXYK
+	 This term contains both inter and intrafragment contribution
+	 For the calculation of Elprep(corr) we used all intra-excitations
+	 */
+	fmt::fprintf(os, "\n");
+	fmt::fprintf(os, "\n");
+	fmt::fprintf(os, "\n");
+	fmt::fprintf(os, "******* NON-DISPERSION INTERACTION ENERGY ******* \n");
+	fmt::fprintf(os, "\n");
+	fmt::fprintf(os, "CCSD strong pairs, weak pairs and (T) triples contribute! \n");
+
+	int N=0;
+	string tmp{};
+	double sum{};
+
+	for(int i=2;i<=dim.nfrag;++i) {
+		for(int j=1;j<i;++j) {
+			tmp=fmt::format("Non-Dispersive interaction between fragments {} and {}:", i, j);
+			fmt::fprintf(os, fs5, tmp, dim.fragccNonDispges[N]*CF);
+
+			tmp=fmt::format("NonDispInt_{}_{}:,", i, j);
+			fmt::fprintf(csv, fs4, tmp, dim.fragccNonDispges[N]*CF);
+			sum+=dim.fragccNonDispges[N];
+			++N;
+		}
+	}
+	fmt::fprintf(os, fs5, "Sum:", sum*CF);
+
+	fmt::fprintf(os, "\n");
+	fmt::fprintf(csv, "\n");
+
+	summary["ENonDisp_int"]=sum*CF;
+	insertOrder.push_back("ENonDisp_int");
+}
+
+void do_delocalized(const Dimer& dim, std::vector<Monomer>& mons, std::ostream& os, std::map<std::string,double>& summary,
+		std::vector<std::string>& insertOrder, std::ostream& csv) {
+
+	fmt::fprintf(os, "\n");
+	fmt::fprintf(os, "\n");
+	fmt::fprintf(os, "\n");
+	fmt::fprintf(os, "******* DELOCALIZED CONTRIBUTIONS ******* \n");
+	fmt::fprintf(os, "\n");
+	//fmt::fprintf(os, fs5, "Delocalized term from CCSD strong pairs:", dim.delocalizedstrongpairs*CF);
+	fmt::fprintf(os, fs5, "Delocalized term from Triples:", dim.delocalizedtriples*CF);
+
+	//fmt::fprintf(csv, fs4, "delocalizedSP", dim.delocalizedstrongpairs);
+	fmt::fprintf(csv, fs4, "delocalizedTriples:,", dim.delocalizedtriples);
+
+	double sum=dim.delocalizedtriples;
+	//double sum=dim.delocalizedstrongpairs+dim.delocalizedtriples;
+	summary["Delocalized_contr"]=sum*CF;
+	insertOrder.push_back("Delocalized_contr");
+}
+
 void do_ccsdint(const Dimer& dim, vector<Monomer>& mons, ostream& os, map<string, double>& summary, vector<string>& insertOrder, ostream& csv) {
 
 	double sum=0.0;
@@ -701,6 +1030,10 @@ void do_triplesint(const Dimer& dim, vector<Monomer>& mons, ostream& os, map<str
 
 void do_consistency(const Dimer& dim, vector<Monomer>& mons, ostream& os, map<string, double>& summary, vector<string>& insertOrder, ostream& csv) {
 
+	fmt::fprintf(os, "\n");
+	fmt::fprintf(os, "\n");
+	fmt::fprintf(os, "\n");
+	fmt::fprintf(csv, "\n");
 	fmt::fprintf(os, "Consistency check:\n");
 	double sum=0.0;
 	if(mons.size() == dim.nfrag) {
@@ -721,9 +1054,11 @@ void do_consistency(const Dimer& dim, vector<Monomer>& mons, ostream& os, map<st
 	for(auto it=summary.begin();it!=summary.end();++it)
 		sum+=it->second;
 
-	summary["E(Ges)_int"]=sum;
-	insertOrder.push_back("E(Ges)_int");
+	summary["E(tot)_int"]=sum;
+	insertOrder.push_back("E(tot)_int");
 	fmt::fprintf(os, fs5, "Sum of all mentioned interaction terms:", sum);
+
+	fmt::fprintf(csv, "\n");
 }
 
 void do_summary(ostream& os, map<string, double>& summary, vector<string>& insertOrder, ostream& csv) {
@@ -739,6 +1074,9 @@ void do_summary(ostream& os, map<string, double>& summary, vector<string>& inser
 	fmt::fprintf(os, "************************************************************** \n");
 	fmt::fprintf(os, "\n");
 
+	fmt::fprintf(csv, "SUMMARY \n");
+	fmt::fprintf(csv, "\n");
+
 	for(size_t i=0;i<insertOrder.size();++i) {
 		tmp=insertOrder[i];
 		fmt::fprintf(os, fs5, tmp, summary[tmp]);
@@ -747,6 +1085,9 @@ void do_summary(ostream& os, map<string, double>& summary, vector<string>& inser
 
 	fmt::fprintf(os, "\n");
 	fmt::fprintf(os, "\n");
+
+	fmt::fprintf(csv, "\n");
+	fmt::fprintf(csv, "\n");
 }
 
 tuple<vector<string>,vector<string>> do_startup(const vector<string>& comps, ostream& os) {
@@ -832,44 +1173,72 @@ void do_comparison(const vector<string>& v1, const vector<string>& v2, bool geop
 	else
 		nvalue=6;
 
-	map<string, double> sum1{}, sum2{};
+	map<string, double> sum1{}, sum2{}, sum3{}, sum4{};
 	string s{}, line{};
 
 	vector<string> res{};
-	vector<string> insertOrder{};
+	vector<string> insertOrder{}, insertOrder2{};
+
+	bool secondrun=false;
 
 	s="Summary";
 	for(size_t i=0;i<v1.size();++i) {
 		line=v1[i];
 		found=line.find(s);
 		if(found!=string::npos) {
-			for(int j=0;j<nvalue;++j) {
-				line=v1[i+3+j];
-				split(res, line, is_any_of(" "), token_compress_on);
-				sum1[res[0]]=stod(res[1]);
-				insertOrder.push_back(res[0]);
-
+			if(secondrun==false) {
+				for(int j=0;j<nvalue;++j) {
+					line=v1[i+3+j];
+					split(res, line, is_any_of(" "), token_compress_on);
+					sum1[res[0]]=stod(res[1]);
+					insertOrder.push_back(res[0]);
+				}
 			}
-			break;
+
+			if(secondrun==true) {
+				for(int j=0;j<nvalue;++j) {
+					line=v1[i+3+j];
+					split(res, line, is_any_of(" "), token_compress_on);
+					sum3[res[0]]=stod(res[1]);
+					insertOrder2.push_back(res[0]);
+				}
+				break;
+			}
+			secondrun=true;
 		}
+
 	}
 
+	secondrun=false;
 	for(size_t i=0;i<v2.size();++i) {
 		line=v2[i];
 		found=line.find(s);
 		if(found!=string::npos) {
-			for(int j=0;j<nvalue;++j) {
-				line=v2[i+3+j];
-				split(res, line, is_any_of(" "), token_compress_on);
-				sum2[res[0]]=stod(res[1]);
+			if(secondrun==false) {
+				for(int j=0;j<nvalue;++j) {
+					line=v2[i+3+j];
+					split(res, line, is_any_of(" "), token_compress_on);
+					sum2[res[0]]=stod(res[1]);
+				}
 			}
-			break;
+
+			if(secondrun==true) {
+				for(int j=0;j<nvalue;++j) {
+					line=v2[i+3+j];
+					split(res, line, is_any_of(" "), token_compress_on);
+					sum4[res[0]]=stod(res[1]);
+				}
+				break;
+			}
+			secondrun=true;
 		}
+
 	}
 
 	fmt::fprintf(os, "%-50s %12s %12s %12s \n", " ", "File 1", "File 2", "Difference");
 	fmt::fprintf(csv, "%-50s %12s %12s %12s \n", " ,", "File 1,", "File 2,", "Difference");
 	fmt::fprintf(os, "\n");
+
 	for(size_t i=0;i<insertOrder.size();++i) {
 		line=insertOrder[i];
 		fmt::fprintf(os, fs7, line, sum1[line], sum2[line], sum2[line]-sum1[line]);
@@ -878,4 +1247,11 @@ void do_comparison(const vector<string>& v1, const vector<string>& v2, bool geop
 
 	fmt::fprintf(os, "\n");
 	fmt::fprintf(os, "\n");
+	fmt::fprintf(csv, "\n");
+
+	for(size_t i=0;i<insertOrder2.size();++i) {
+		line=insertOrder2[i];
+		fmt::fprintf(os, fs7, line, sum3[line], sum4[line], sum4[line]-sum3[line]);
+		fmt::fprintf(csv, fs8, line, sum3[line], sum4[line], sum4[line]-sum3[line]);
+	}
 }

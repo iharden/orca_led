@@ -43,14 +43,35 @@ void do_inter(const Dimer& dim, std::ostream& os, std::ostream& csv);
 void do_ccsddisp(const Dimer& dim, std::ostream& os, std::ostream& csv);
 void do_triplesdisp(const Dimer& dim, std::ostream& os, std::ostream& csv);
 void do_ccsdnondisp(const Dimer& dim, std::ostream& os, std::ostream& csv);
+void do_triplesnondisp(const Dimer& dim, std::ostream& os, std::ostream& csv);
+void do_delocalized(const Dimer& dim, std::ostream& os, std::ostream& csv);
 
 // FUNCTIONS CALLED IN DO_LED(DIM,MONS)
-void do_generalinfo(const Dimer& dim, std::vector<Monomer>& mon, std::ostream& os);
-void do_geoprep(const Dimer& dim, std::vector<Monomer>& mon, std::ostream& os, std::map<std::string,double>& summary, std::vector<std::string>& insertOrder, std::ostream& csv);
-void do_hfint(const Dimer& dim, std::vector<Monomer>& mon, std::ostream& os, std::map<std::string,double>& summary, std::vector<std::string>& insertOrder, std::ostream& csv);
-void do_ccsdint(const Dimer& dim, std::vector<Monomer>& mon, std::ostream& os, std::map<std::string,double>& summary, std::vector<std::string>& insertOrder, std::ostream& csv);
-void do_triplesint(const Dimer& dim, std::vector<Monomer>& mon, std::ostream& os, std::map<std::string,double>& summary, std::vector<std::string>& insertOrder, std::ostream& csv);
-void do_consistency(const Dimer& dim, std::vector<Monomer>& mon, std::ostream& os, std::map<std::string,double>& summary, std::vector<std::string>& insertOrder, std::ostream& csv);
+void do_generalinfo(const Dimer& dim, std::vector<Monomer>& mons, std::ostream& os);
+void do_approachone(const Dimer& dim, std::vector<Monomer>& mons, std::ostream& os, std::map<std::string,double>& summary,
+		std::vector<std::string>& insertOrder, std::ostream& csv);
+void do_approachtwo(const Dimer& dim, std::vector<Monomer>& mons, std::ostream& os, std::map<std::string,double>& summary,
+		std::vector<std::string>& insertOrder, std::ostream& csv);
+void do_geoprep(const Dimer& dim, std::vector<Monomer>& mons, std::ostream& os, std::map<std::string,double>& summary,
+		std::vector<std::string>& insertOrder, std::ostream& csv);
+void do_elprep(const Dimer& dim, std::vector<Monomer>& mons, std::ostream& os, std::map<std::string,double>& summary,
+		std::vector<std::string>& insertOrder, std::ostream& csv);
+void do_refint(const Dimer& dim, std::vector<Monomer>& mons, std::ostream& os, std::map<std::string,double>& summary,
+		std::vector<std::string>& insertOrder, std::ostream& csv);
+void do_dispint(const Dimer& dim, std::vector<Monomer>& mons, std::ostream& os, std::map<std::string,double>& summary,
+		std::vector<std::string>& insertOrder, std::ostream& csv);
+void do_nondispint(const Dimer& dim, std::vector<Monomer>& mons, std::ostream& os, std::map<std::string,double>& summary,
+		std::vector<std::string>& insertOrder, std::ostream& csv);
+void do_delocalized(const Dimer& dim, std::vector<Monomer>& mons, std::ostream& os, std::map<std::string,double>& summary,
+		std::vector<std::string>& insertOrder, std::ostream& csv);
+void do_hfint(const Dimer& dim, std::vector<Monomer>& mons, std::ostream& os, std::map<std::string,double>& summary,
+		std::vector<std::string>& insertOrder, std::ostream& csv);
+void do_ccsdint(const Dimer& dim, std::vector<Monomer>& mons, std::ostream& os, std::map<std::string,double>& summary,
+		std::vector<std::string>& insertOrder, std::ostream& csv);
+void do_triplesint(const Dimer& dim, std::vector<Monomer>& mons, std::ostream& os, std::map<std::string,double>& summary,
+		std::vector<std::string>& insertOrder, std::ostream& csv);
+void do_consistency(const Dimer& dim, std::vector<Monomer>& mons, std::ostream& os, std::map<std::string,double>& summary,
+		std::vector<std::string>& insertOrder, std::ostream& csv);
 void do_summary(std::ostream& os, std::map<std::string,double>& summary, std::vector<std::string>& insertOrder, std::ostream& csv);
 
 // FUNCTIONS CALLED IN DO_COMPARE(COMPFILES)

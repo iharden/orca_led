@@ -87,4 +87,6 @@ Monomer::Monomer(string argv) {
 
 	//ETRIPLES
 	et = eccsdt-eccsd;
+
+	ecorrt = ecorr + et;
 }

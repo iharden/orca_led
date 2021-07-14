@@ -25,6 +25,7 @@ Dimer::Dimer(string argv) {
 	vector<string> res{};
 	size_t found{};
 	int ifrag{};
+	int N{};
 
 	while(getline(dimer, s))
 		file.push_back(s);
@@ -126,7 +127,9 @@ Dimer::Dimer(string argv) {
 	}
 
 	//ETRIPLES
-		et = eccsdt-eccsd;
+	et = eccsdt-eccsd;
+
+	ecorrt = ecorr + et;
 
 	// NUMBER OF FRAGMENTS
 	s = "Number of fragments";
@@ -185,6 +188,11 @@ Dimer::Dimer(string argv) {
 		}
 	}
 
+	// Calculate HF interaction
+	for(size_t i=0;i<fraghfK.size();++i) {
+		hfint.push_back(fraghfJ[i]+fraghfK[i]);
+	}
+
 	// SUM OF NONDISPERSION (STRONG PAIRS AND WEAK PAIRS)
 	s = "Sum of non dispersive correlation terms:";
 	for(size_t i=0;i<file.size();++i) {
@@ -231,6 +239,11 @@ Dimer::Dimer(string argv) {
 				}
 			}
 		}
+	}
+
+	// CALCULATE TOTAL CC-INTERACTION
+	for(size_t i=0;i<fragInterstrong.size();++i) {
+		ccint.push_back(fragInterstrong[i]+fragInterweak[i]+fragIntertriples[i]);
 	}
 
 	// CALCULATE GAMMA
@@ -285,6 +298,42 @@ Dimer::Dimer(string argv) {
 			for(int i=0;i<nfrag;++i) {
 				fragIntrasingles.push_back(stod(res[2+i]));
 			}
+			break;
+		}
+	}
+
+	for(int i=0;i<nfrag;++i) {
+		fragIntrages.push_back(fragIntrastrong[i]+fragIntratriples[i]+fragIntraweak[i]+fragIntrasingles[i]);
+	}
+
+	// CALCULATE NON-DISPERSIVE TRIPLES
+	for(int i=0;i<nfrag;++i) {
+		fragccNonDisptriples.push_back((1-gamma[i])*fragIntertriples[i]);
+	}
+
+	// CALCULATE PAIRWISE NONDISP CONTRIBUTIONS
+	for(size_t i=0;i<fragccDispges.size();++i) {
+		fragccNonDispges.push_back(ccint[i]-fragccDispges[i]);
+	}
+
+	// DELOCALIZED TRIPLES
+	s="Delocalized correction (triples)";
+	for(string line:file) {
+		found = line.find(s);
+		if(found!=string::npos) {
+			split(res, line, is_any_of(" "), token_compress_on);
+			delocalizedtriples=stod(res[3]);
+			break;
+		}
+	}
+
+	// DELOCALIZED Strong-pairs
+	s="Delocalized correlation";
+	for(string line:file) {
+		found = line.find(s);
+		if(found!=string::npos) {
+			split(res, line, is_any_of(" "), token_compress_on);
+			delocalizedstrongpairs=stod(res[2]);
 			break;
 		}
 	}
