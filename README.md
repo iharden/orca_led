@@ -1,5 +1,5 @@
 # orca_led
-Prints main results from Local Energy Decomposition analysis and decomposes the interaction energy between the monomers.
+Prints main results from Local Energy Decomposition analysis and decomposes the binding energy between the monomers.
 
 ## Description
 The purpose of this little program is to facilitate the LED analysis as implemented in ORCA (https://orcaforum.kofo.mpg.de/app.php/portal).
