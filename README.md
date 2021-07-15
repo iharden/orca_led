@@ -33,37 +33,32 @@ Sum of the fragments HF reference and interaction energies:            -570.1774
 or
 ```
 ************************************************************** 
-******* I will start now with the Interaction Energies ******* 
+*******                Approach ONE                    ******* 
 ************************************************************** 
 
-You gave me 4 monomer files and 2 fragments are present in the Dimer-file! 
-Name of Dimer-file 
-   endo.mpi8.out 
-
-Name of Monomer-files 
-   frag1.mpi8.out 
-   frag2.mpi8.out 
-   frag1_opt.mpi8.out 
-   frag2_opt.mpi8.out 
-                              Dimer         Monomer  1    Monomer  2    
-
-E(HF):                        -570.17746    -192.82774    -377.35513    
-E(CCSD):                      -572.32448    -193.65822    -378.64950    
-E(CCSD(T)):                   -572.43223    -193.69929    -378.71098    
-E(CORR):                      -2.14702      -0.83048      -1.29437      
-E(Triples):                   -0.10776      -0.04107      -0.06147      
-
-I will calculate the geometric and the electronic preparation 
-
-If not stated otherwise, energies from now on are in kcal/mol !!! 
 
 
-
-******* Geometric preparation energy ******* 
+******* GEOMETRIC PREPARATION ENERGY ******* 
 
 Geometric preparation for Fragment 1:                                  13.40991 
 Geometric preparation for Fragment 2:                                  8.01998 
 Sum:                                                                   21.42989 
+
+
+
+******* HF-Interaction energy ******* 
+
+Electronic preparation for Fragment 1:                                 296.86135 
+Electronic preparation for Fragment 2:                                 183.61209 
+Sum:                                                                   480.47344 
+
+Electrostatic Interaction between fragments 2 and 1:                   -348.42518 
+
+Exchange Interaction between fragments 2 and 1:                        -128.65306 
+
+Consistency check:
+Total HF interaction energy:                                           3.39520 
+Sum of elec.preparation/electrostatic- and exchange Interaction:       3.39520 
 ```
 
 ## Usage
