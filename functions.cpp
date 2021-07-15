@@ -68,7 +68,8 @@ void do_approachone(const Dimer& dim, vector<Monomer>& mons, ostream& os, map<st
 	fmt::fprintf(os, "\n");
 	fmt::fprintf(os, "\n");
 
-	fmt::fprintf(csv, "Binding energies \n");
+	fmt::fprintf(csv, "BINDING ENERGIES \n");
+	fmt::fprintf(csv, "\n");
 	fmt::fprintf(csv, "Approach ONE \n");
 	fmt::fprintf(csv, "\n");
 	do_geoprep(dim, mons, os, summary, insertOrder, csv);
@@ -124,9 +125,7 @@ void print_header(ostream& os) {
 	fmt::fprintf(os, "                  ************************************************************** \n");
 	fmt::fprintf(os, "                  ***                                                        *** \n");
 	fmt::fprintf(os, "                  ***                        ORCA_LED                        *** \n");
-	fmt::fprintf(os, "                  ***                       v1.0 01/21                       *** \n");
-	fmt::fprintf(os, "                  ***                       v1.1 06/21                       *** \n");
-	fmt::fprintf(os, "                  ***                       by iharden                       *** \n");
+	fmt::fprintf(os, "                  ***                       v1.2 07/21                       *** \n");
 	fmt::fprintf(os, "                  ***                                                        *** \n");
 	fmt::fprintf(os, "                  ************************************************************** \n");
 	fmt::fprintf(os, "\n");
@@ -185,7 +184,7 @@ void do_hartreefock(const Dimer& dim, ostream& os, ostream& csv) {
 	//CHECK IF E(HF) AND E(REF) ARE EQUAL
 	if(abs(dim.ehf-dim.eref) > 0.0001) {
 		fmt::fprintf(os, "*****************************************************************************************************\n");
-		fmt::fprintf(os, "WARNING: The Hartree-Fock energy (E(HF)) differs from the HF-Reference energy E(Ref) used in LED! ***\n");
+		fmt::fprintf(os, "WARNING: The Hartree-Fock energy E(HF) differs from the HF-Reference energy E(Ref) used in LED!   ***\n");
 		fmt::fprintf(os, "Typically, this happens because LED makes use of RI-JK while the initial HF calculation might not ***\n");
 		fmt::fprintf(os, "I will print both energies but for the consistency check I am using E(Ref)                        ***\n");
 		fmt::fprintf(os, "Check your results carefully!                                                                     ***\n");
@@ -679,13 +678,14 @@ void do_generalinfo(const Dimer& dim, vector<Monomer>& mons, ostream& os) {
 	fmt::fprintf(os, "There are several different ways of how to decompose the binding energy \n");
 	fmt::fprintf(os, "This program uses two different approaches and it will do both approaches by default \n");
 	fmt::fprintf(os, "\n");
-	fmt::fprintf(os, "Approach 1: Calculate Dispersive and Nondispersive interactions only at the DLPNO-CCSD level and treat triples interactions individually \n");
-	fmt::fprintf(os, "Ebind = E_geo_prep + E_el_prep (ref) + E_int_Coloumb (ref) + E_Int_XC (ref) + E_Disp (CCSD) + E_int_nondisp (CCSD) + E_int (C-(T)) \n");
+	fmt::fprintf(os, "Approach 1: Calculate dispersive and non-dispersive interactions only at the DLPNO-CCSD level and treat triples interactions separately \n");
+	fmt::fprintf(os, "Ebind = E_geo_prep + E_el_prep (ref) + E_int_Coulomb (ref) + E_Int_Exchange (ref) + E_Disp (CCSD) + E_int_nondisp (CCSD) + E_int (C-(T)) \n");
 	fmt::fprintf(os, "Within approach 1 the non-dispersive interaction is NOT decomposed into pairwise interaction terms! \n");
 	fmt::fprintf(os, "\n");
 	fmt::fprintf(os, "Approach 2: Decompose triples interactions into dispersive and non-dispersive contributions. \n");
-	fmt::fprintf(os, "Decompose non-dispersive interactions further in electronic preparation and pairwise fragment interaction terms \n");
-	fmt::fprintf(os, "Ebind = E_geo_prep + E_el_prep + E_int_Coloumb (ref) + E_Int_XC (ref) + E_Disp (CCSD-(T)) + E_int_nondisp (CCSD(T)) \n");
+	fmt::fprintf(os, "Decompose non-dispersive interactions further into electronic preparation and pairwise fragment interaction terms \n");
+	fmt::fprintf(os, "Ebind = E_geo_prep + E_el_prep + E_int_Coulomb (ref) + E_Int_Exchange (ref) + E_Disp (CCSD-(T)) + E_int_nondisp (CCSD(T)) \n");
+	fmt::fprintf(os, "For systems with more than two fragments in addition a delocalized term from the triples excitations arises");
 	fmt::fprintf(os, "\n");
 	fmt::fprintf(os, "\n");
 }
@@ -1235,6 +1235,11 @@ void do_comparison(const vector<string>& v1, const vector<string>& v2, bool geop
 
 	}
 
+	fmt::fprintf(os, "Approach ONE");
+	fmt::fprintf(csv, "Approach ONE");
+	fmt::fprintf(os, "\n");
+	fmt::fprintf(csv, "\n");
+
 	fmt::fprintf(os, "%-50s %12s %12s %12s \n", " ", "File 1", "File 2", "Difference");
 	fmt::fprintf(csv, "%-50s %12s %12s %12s \n", " ,", "File 1,", "File 2,", "Difference");
 	fmt::fprintf(os, "\n");
@@ -1246,6 +1251,11 @@ void do_comparison(const vector<string>& v1, const vector<string>& v2, bool geop
 	}
 
 	fmt::fprintf(os, "\n");
+	fmt::fprintf(os, "\n");
+	fmt::fprintf(csv, "\n");
+
+	fmt::fprintf(os, "Approach TWO");
+	fmt::fprintf(csv, "Approach TWO");
 	fmt::fprintf(os, "\n");
 	fmt::fprintf(csv, "\n");
 
