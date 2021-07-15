@@ -26,6 +26,7 @@ IntraTrip_2:,   -0.05581
 IntraWP_2:,     -0.00121 
 IntraSing_2:,   -0.00000 
 
+TotalInt_1_2:,  -0.85653 
 DispSP_2_1:,    -0.02966 
 DispWP_2_1:,    -0.00107 
 SumDisp:,       -0.03073 
@@ -36,12 +37,20 @@ NonDispSP:,     -2.11442
 NonDispWP:,     -0.00187 
 NonDispSum:,    -2.11629 
 
+NonDispTrip_2_1:, -0.00947 
+
+BINDING ENERGIES 
+
+Approach ONE 
+
 GeoPrep_1:,          13.40991 
 GeoPrep_2:,          8.01998 
 
 ElPrep_1:,           296.86135 
 ElPrep_2:,           183.61209 
+
 ElStat_2_1:,         -348.42518 
+
 Exchange_2_1:,       -128.65306 
 HFint:;              3.39520 
 
@@ -50,10 +59,51 @@ Disp_int:,           -19.28184
 
 Triples_int:,        -3.26945 
 
+
 Total_int:,          7.64715 
+
+SUMMARY 
+
 E(Geo-prep),         21.42989 
 E(HF)_int,           3.39520 
 E(NonDisp)_int,      5.37386 
 E(Disp),             -19.28184 
 E(Triples)_int,      -3.26945 
-E(Ges)_int,          7.64767 
+E(tot)_int,          7.64767 
+
+
+Approach TWO 
+
+GeoPrep_1:,          13.40991 
+GeoPrep_2:,          8.01998 
+
+RefPrep_1:,          296.86135 
+RefPrep_2:,          183.61209 
+Sum:,                480.47344 
+
+CorrPrep_1:,         19.66179 
+CorrPrep_2:,         23.56141 
+Sum:,                43.22320 
+
+ElStat_2_1:,         -348.42518 
+
+Exchange_2_1:,       -128.65306 
+
+
+DispInt_2_1:,   -22.77429 
+
+NonDispInt_2_1:, -37.62633 
+
+
+Total_int:,          7.64715 
+
+SUMMARY 
+
+E(Geo-prep),         21.42989 
+E(El-prep),          523.69664 
+E(ref)_int,          -477.07824 
+EDisp_int,           -22.77429 
+ENonDisp_int,        -37.62633 
+E(tot)_int,          7.64767 
+
+

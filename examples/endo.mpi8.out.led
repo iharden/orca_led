@@ -1,9 +1,7 @@
                   ************************************************************** 
                   ***                                                        *** 
                   ***                        ORCA_LED                        *** 
-                  ***                       v1.0 01/21                       *** 
-                  ***                       v1.1 06/21                       *** 
-                  ***                       by iharden                       *** 
+                  ***                       v1.2 07/21                       *** 
                   ***                                                        *** 
                   ************************************************************** 
 
@@ -17,7 +15,7 @@ However, it might be useful when you want to compare the outcomes of many LED an
 
 *** 
 Some general remarks:
-Without using the compare-mode (--compare) I will only calculate the interaction energies 
+Without using the compare-mode (--compare) I will only calculate and decompose the interaction energies 
 To include the electronic preparation I need DLPNO-CCSD(T) calculations of the fragments in the dimer geometry 
 To include the geometric preparation I need DLPNO-CCSD(T) calculations of the fragments in their equilibrium geometries 
 Type 'orca_led --help' to get a list of options and some command line examples 
@@ -25,7 +23,7 @@ Type 'orca_led --help' to get a list of options and some command line examples
 
 
 
-Program was started at Mon Jul  5 10:16:16 2021 CEST
+Program was started at Thu Jul 15 10:46:00 2021 CEST
 
 Name of Dimer-file 
    endo.mpi8.out 
@@ -83,6 +81,14 @@ Interaction between fragments 2 and 1:                                 -0.76027 
 
 
 
+Total Interaction Map: 
+
+                                        Fragment 1    Fragment 2    
+
+Fragment 1                              0.00000       -0.85653      
+Fragment 2                                            0.00000       
+
+
 
 ******* DECOMPOSITION OF CCSD-DISPERSION ******* 
 
@@ -113,6 +119,13 @@ Sum of Nondispersion terms:                                            -2.11629
 
 
 
+******* TRIPLES CORRECTION TO NON-DISPERSION ******* 
+
+Triples correction to Non-Dispersion between fragments 2 and 1:        -0.00947 
+
+
+
+
 
 ************************************************************** 
 ******* I will start now with the Interaction Energies ******* 
@@ -127,6 +140,7 @@ Name of Monomer-files
    frag2.mpi8.out 
    frag1_opt.mpi8.out 
    frag2_opt.mpi8.out 
+
                               Dimer         Monomer  1    Monomer  2    
 
 E(HF):                        -570.17746    -192.82774    -377.35513    
@@ -140,8 +154,26 @@ I will calculate the geometric and the electronic preparation
 If not stated otherwise, energies from now on are in kcal/mol !!! 
 
 
+******* IMPORTANT NOTE ******* 
+There are several different ways of how to decompose the binding energy 
+This program uses two different approaches and it will do both approaches by default 
 
-******* Geometric preparation energy ******* 
+Approach 1: Calculate dispersive and non-dispersive interactions only at the DLPNO-CCSD level and treat triples interactions separately 
+Ebind = E_geo_prep + E_el_prep (ref) + E_int_Coulomb (ref) + E_Int_Exchange (ref) + E_Disp (CCSD) + E_int_nondisp (CCSD) + E_int (C-(T)) 
+Within approach 1 the non-dispersive interaction is NOT decomposed into pairwise interaction terms! 
+
+Approach 2: Decompose triples interactions into dispersive and non-dispersive contributions. 
+Decompose non-dispersive interactions further into electronic preparation and pairwise fragment interaction terms 
+Ebind = E_geo_prep + E_el_prep + E_int_Coulomb (ref) + E_Int_Exchange (ref) + E_Disp (CCSD-(T)) + E_int_nondisp (CCSD(T)) 
+For systems with more than two fragments in addition a delocalized term from the triples excitations arises
+
+************************************************************** 
+*******                Approach ONE                    ******* 
+************************************************************** 
+
+
+
+******* GEOMETRIC PREPARATION ENERGY ******* 
 
 Geometric preparation for Fragment 1:                                  13.40991 
 Geometric preparation for Fragment 2:                                  8.01998 
@@ -156,6 +188,7 @@ Electronic preparation for Fragment 2:                                 183.61209
 Sum:                                                                   480.47344 
 
 Electrostatic Interaction between fragments 2 and 1:                   -348.42518 
+
 Exchange Interaction between fragments 2 and 1:                        -128.65306 
 
 Consistency check:
@@ -171,6 +204,9 @@ Total Dispersion interaction energy:                                   -19.28184
 ******* Triples Interaction energy ******* 
 
 Total Triples interaction energy:                                      -3.26945 
+
+
+
 
 Consistency check:
 Total interaction energy (with geometric preparation):                 7.64715 
@@ -188,7 +224,90 @@ E(HF)_int                                                              3.39520
 E(NonDisp)_int                                                         5.37386 
 E(Disp)                                                                -19.28184 
 E(Triples)_int                                                         -3.26945 
-E(Ges)_int                                                             7.64767 
+E(tot)_int                                                             7.64767 
 
 
-Total computation time: 15.74644 ms
+
+
+
+************************************************************** 
+*******                Approach TWO                    ******* 
+************************************************************** 
+
+
+
+******* GEOMETRIC PREPARATION ENERGY ******* 
+
+Geometric preparation for Fragment 1:                                  13.40991 
+Geometric preparation for Fragment 2:                                  8.01998 
+Sum:                                                                   21.42989 
+
+
+
+******* ELECTRONIC PREPARATION OF REFERENCE WAVEFUNCTION ******* 
+
+Reference preparation for Fragment 1:                                  296.86135 
+Reference preparation for Fragment 2:                                  183.61209 
+Sum:                                                                   480.47344 
+
+******* ELECTRONIC PREPARATION OF CORRELATION WAVEFUNCTION ******* 
+
+Correlation preparation for Fragment 1:                                19.66179 
+Correlation preparation for Fragment 2:                                23.56141 
+Sum:                                                                   43.22320 
+
+
+
+
+******* HF-INTERACTION ENERGY ******* 
+
+Electrostatic Interaction between fragments 2 and 1:                   -348.42518 
+
+Exchange Interaction between fragments 2 and 1:                        -128.65306 
+
+Sum of electrostatic- and exchange Interaction:                        -477.07824 
+
+
+
+
+******* DISPERSION INTERACTION ENERGY ******* 
+
+CCSD strong pairs, weak pairs and (T) triples contribute! 
+Dispersion interaction between fragments 2 and 1:                      -22.77429 
+
+Total Dispersion (Strong pairs):                                       -18.61101 
+Total Dispersion (Weak pairs):                                         -0.67082 
+Total Dispersion (Triples):                                            -3.49246 
+Total Dispersion (Sum):                                                -22.77429 
+
+
+
+******* NON-DISPERSION INTERACTION ENERGY ******* 
+
+CCSD strong pairs, weak pairs and (T) triples contribute! 
+Non-Dispersive interaction between fragments 2 and 1:                  -37.62633 
+Sum:                                                                   -37.62633 
+
+
+
+
+Consistency check:
+Total interaction energy (with geometric preparation):                 7.64715 
+Sum of all mentioned interaction terms:                                7.64767 
+
+
+
+
+************************************************************** 
+*******                    Summary                     ******* 
+************************************************************** 
+
+E(Geo-prep)                                                            21.42989 
+E(El-prep)                                                             523.69664 
+E(ref)_int                                                             -477.07824 
+EDisp_int                                                              -22.77429 
+ENonDisp_int                                                           -37.62633 
+E(tot)_int                                                             7.64767 
+
+
+Total computation time: 6.04211 ms
