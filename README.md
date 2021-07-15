@@ -4,7 +4,7 @@ Prints main results from Local Energy Decomposition analysis and decomposes the 
 ## Description
 The purpose of this little program is to facilitate the LED analysis as implemented in ORCA (https://orcaforum.kofo.mpg.de/app.php/portal).
 `orca_led` does not help you with the calculations. It works only with ORCA output files.
-Its main purpose is to print the essential results of LED + it performs the decomposition of the interaction energy.
+Its main purpose is to print the essential results of LED + it performs the decomposition of the binding energy.
 However, it might be useful when you want to compare the outcomes of many LED analyzes. 
 
 Some general remarks:
