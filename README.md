@@ -69,7 +69,7 @@ Sum of elec.preparation/electrostatic- and exchange Interaction:       3.39520
 `orca_led --compare file1.led file2.led` compares two .led files and calculates the differences of the various contributions to the binding energy.
 
 ## Requirements
-Tested with `ORCA 5.0`. Precompiled binaries for Ubuntu and Windows 10 are statically linked and do not have further dependencies. When compiling the source code from scratch, Third-Party libraries (Boost and fmt) are needed. Boost.program_options is not header-only and therefore requires a proper installation of Boost. Note: fmt was used in header_only mode so the FMT_HEADER_ONLY macro needs to be set.
+Tested with `ORCA 5.0`. Precompiled binaries for Ubuntu and Windows 10 are statically linked and do not have further dependencies. When compiling the source code from scratch, Third-Party libraries (fmt) are needed. Note: fmt was used in header_only mode so the FMT_HEADER_ONLY macro needs to be set.
 
 ## Contributor
 contributed by Ingolf Harden
