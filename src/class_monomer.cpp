@@ -7,9 +7,9 @@
 
 
 #include "class_monomer.hpp"
+#include "functions.hpp"
 
 using namespace std;
-using namespace boost;
 
 Monomer::Monomer(string argv) {
 	ifstream monomer(argv);
@@ -32,8 +32,8 @@ Monomer::Monomer(string argv) {
 	for(string line:file) {
 		found = line.find(s);
 		if(found!=string::npos) {
-			split(res, line, is_any_of(" "), token_compress_on);
-			nel=stoi(res[6]);
+			split(res, line);
+			nel=stoi(res[5]);
 			break;
 		}
 	}
@@ -43,7 +43,7 @@ Monomer::Monomer(string argv) {
 	for(string line:file) {
 		found = line.find(s);
 		if(found!=string::npos) {
-			split(res, line, is_any_of(" "), token_compress_on);
+			split(res, line);
 			nbasis=stoi(res[5]);
 			break;
 		}
@@ -54,7 +54,7 @@ Monomer::Monomer(string argv) {
 	for(string line:file) {
 		found = line.find(s);
 		if(found!=string::npos) {
-			split(res, line, is_any_of(" "), token_compress_on);
+			split(res, line);
 			ehf=stod(res[2]);
 			break;
 		}
@@ -76,7 +76,7 @@ Monomer::Monomer(string argv) {
 		for(string line:file) {
 			found = line.find(s);
 			if(found!=string::npos) {
-				split(res, line, is_any_of(" "), token_compress_on);
+				split(res, line);
 				eccsd=stod(res[2]);
 				break;
 			}
@@ -90,7 +90,7 @@ Monomer::Monomer(string argv) {
 		for(string line:file) {
 			found = line.find(s);
 			if(found!=string::npos) {
-				split(res, line, is_any_of(" "), token_compress_on);
+				split(res, line);
 				eccsdt=stod(res[2]);
 				break;
 			}
@@ -108,7 +108,7 @@ Monomer::Monomer(string argv) {
 		for(string line:file) {
 			found=line.find(s);
 			if(found!=string::npos) {
-				split(res, line, is_any_of(" "), token_compress_on);
+				split(res, line);
 				eccsd=stod(res[2]);
 				break;
 			}

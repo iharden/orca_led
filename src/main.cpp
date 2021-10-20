@@ -4,43 +4,40 @@
  *  Created on: Dec 21, 2020
  *      Author: iharden
  */
-
-#include <boost/program_options.hpp>
 #include <thread>
-
+#include <algorithm>
 #include "class_monomer.hpp"
 #include "class_dimer.hpp"
 #include "functions.hpp"
 
-
 using namespace std;
-using namespace boost::program_options;
 
 int main(int argc, char* argv[]) {
 	chrono::time_point<chrono::high_resolution_clock> tstart, tend, ttotalstart, ttotalend;
 	ttotalstart = chrono::high_resolution_clock::now();
+
 	string dimername{};
 	string tmp{};
 	vector<string> monomers{};
 	vector<string> comps{};
 
-	// BOOST PROGRAM_OPTIONS DESCRIPTIONS
-	options_description desc("Options");
-	desc.add_options()
-		("help,h", "produce help message")
-		("dimer,d", value<string>(&dimername), "set Dimer-file")
-		("monomers,m", value<vector<string>>(&monomers)->multitoken(), "set Monomer-files")
-		("compare,c",value<vector<string>>(&comps)->multitoken(), "set files for comparison");
+	vector<string> cmd_arg{};
+	for(int i=1;i<argc;++i)
+		cmd_arg.push_back(argv[i]);
 
-	variables_map vm;
-	store(parse_command_line(argc, argv, desc), vm);
-	notify(vm);
+	if((find(cmd_arg.begin(), cmd_arg.end(), "-h") != cmd_arg.end()) || (find(cmd_arg.begin(), cmd_arg.end(), "--help") != cmd_arg.end())){
+		cout << "______________________________________________________________________________________________________________________________ \n";
+		cout << "\n";
+		cout << "  -h, --help:       Print this message \n";
+		cout << "  -d, --dimer:      Specify ORCA output file that contains LED results \n";
+		cout << "  -m, --monomers:   Specify list of ORCA output files of monomers for electronic/geometric preparation \n";
+		cout << "  -c, --compare:    Specify two .led files obtained from previous orca_led runs to compare two binding energies. \n"
+				"                    Works only if the decomposition of binding energies was carried out! \n \n";
+		cout << "______________________________________________________________________________________________________________________________ \n \n";
 
-	if(vm.count("help") || argc == 1) {
-		cout << desc << "\n";
 		cout << "How you should use this program: \n";
 		cout << "Start with the dimer file. Only one dimer file can be specified \n";
-		cout << "Continue with the monomer files from fragment 1 to fragment N in Dimer geometry (for electronic preparation) \n";
+		cout << "Continue with the monomer files from fragment 1 to fragment N in dimer geometry (for electronic preparation) \n";
 		cout << "Continue with the monomer files from fragment 1 to fragment N in equilibrium geometry (for geometric preparation) \n";
 		cout << "The program will produce a DIMERNAME.led file which contains the results \n";
 		cout << "It will also write a DIMERNAME.csv file which can be opened by Excel or LibreOffice \n";
@@ -49,15 +46,23 @@ int main(int argc, char* argv[]) {
 		cout << "Command line example: \n";
 		cout << "orca_led --dimer dimer.out --monomers frag1.out frag2.out frag1_opt.out frag2_opt.out \n";
 		cout << "\n";
-		cout << "For the compare mode you need to specify exactly two .led files \n";
+		cout << "For the compare mode you have to specify exactly two .led files \n";
 		cout << "Command line example: \n";
 		cout << "orca_led --compare file1.led file2.led \n";
 		cout << "\n";
 		return 0;
 	}
 
+	if((find(cmd_arg.begin(), cmd_arg.end(), "-c") != cmd_arg.end()) || (find(cmd_arg.begin(), cmd_arg.end(), "--compare") != cmd_arg.end())) {
 
-	if(vm.count("compare")) {
+		auto found=find(cmd_arg.begin(), cmd_arg.end(), "-c");
+		if(found==cmd_arg.end())
+			found=find(cmd_arg.begin(), cmd_arg.end(), "--compare");
+
+		int idx=distance(cmd_arg.begin(),found);
+		comps.push_back(cmd_arg[idx+1]);
+		comps.push_back(cmd_arg[idx+2]);
+
 		ofstream oss{"comparison.led"};
 		ofstream csv{"comparison.csv"};
 		do_compare(comps, oss, csv);
@@ -66,6 +71,30 @@ int main(int argc, char* argv[]) {
 		oss.close();
 		csv.close();
 		return 0;
+	}
+
+	if((find(cmd_arg.begin(), cmd_arg.end(), "-d") != cmd_arg.end()) || (find(cmd_arg.begin(), cmd_arg.end(), "--dimer") != cmd_arg.end())) {
+
+		auto found=find(cmd_arg.begin(), cmd_arg.end(), "-d");
+		if(found==cmd_arg.end())
+			found=find(cmd_arg.begin(), cmd_arg.end(), "--dimer");
+
+		int idx=distance(cmd_arg.begin(),found);
+		dimername=cmd_arg[idx+1];
+	}
+
+	if((find(cmd_arg.begin(), cmd_arg.end(), "-m") != cmd_arg.end()) || (find(cmd_arg.begin(), cmd_arg.end(), "--monomers") != cmd_arg.end())) {
+
+		auto found=find(cmd_arg.begin(), cmd_arg.end(), "-m");
+		if(found==cmd_arg.end())
+			found=find(cmd_arg.begin(), cmd_arg.end(), "--monomers");
+
+		int idx=distance(cmd_arg.begin(),found);
+
+		while(cmd_arg[idx] != "-d" && cmd_arg[idx] != "--dimer" && idx < cmd_arg.size()-1) {
+			monomers.push_back(cmd_arg[idx+1]);
+			++idx;
+		}
 	}
 
 	// CALL CONSTRUCTORS FOR INPUT FILES

@@ -17,8 +17,6 @@
 #include <chrono>
 #include <tuple>
 
-#include <boost/algorithm/string.hpp>
-
 #include "fmt/format.h"
 #include "fmt/core.h"
 #include "fmt/format-inl.h"
@@ -28,8 +26,9 @@
 #include "class_monomer.hpp"
 #include "class_dimer.hpp"
 
-// FUNCTIONS CALLED IN MAIN()
+// FUNCTIONS CALLED IN MAIN() OR HELPING FUNCTIONS
 double get_time(std::chrono::time_point<std::chrono::high_resolution_clock>  start, std::chrono::time_point<std::chrono::high_resolution_clock> finish);
+void split(std::vector<std::string>& res, std::string& str);
 void do_led(const Dimer& dim, std::ostream& os, std::ostream& csv);
 void do_led(const Dimer& dim, std::vector<Monomer>& mons, std::ostream& os, std::ostream& csv);
 void do_compare(const std::vector<std::string> comps, std::ostream& os, std::ostream& csv);

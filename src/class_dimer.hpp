@@ -14,9 +14,6 @@
 #include <vector>
 #include <exception>
 
-#include <boost/algorithm/string.hpp>
-#include <boost/format.hpp>
-
 class Dimer {
 public:
 	int nel = 0;

@@ -8,7 +8,6 @@
 #include "functions.hpp"
 
 using namespace std;
-using namespace boost;
 
 namespace {
 	constexpr double CF=627.509608; //Eh to kcal/mol
@@ -30,6 +29,38 @@ namespace {
 double get_time(chrono::time_point<chrono::high_resolution_clock>  start, chrono::time_point<chrono::high_resolution_clock> finish) {
 	chrono::duration<double, milli> elapsed = finish - start;
 	return elapsed.count();
+}
+
+void split(std::vector<std::string>& res, std::string& str) {
+
+	res.clear();
+    // Remove leading white spaces
+    while(str[0] == ' ') {
+    	str=str.substr(1);
+    }
+    // Remove final white spaces
+    while(str[str.size()-1] == ' ')
+    	str=str.substr(0,str.size()-1);
+
+    size_t start=0;
+    size_t end=0;
+
+	while(str.find_first_of(' ', start) != string::npos) {
+
+		end = str.find_first_of(' ', start);
+		if(str[end+1] != ' ') {
+			res.push_back(str.substr(start, end-start));
+			start=end+1;
+		}
+		else {
+			res.push_back(str.substr(start,end-start));
+			while(str[end+1] == ' ') {
+				++end;
+			}
+			start=end+1;
+		}
+    }
+	res.push_back(str.substr(start,str.size()));
 }
 
 void do_led(const Dimer& dim, ostream& os, ostream& csv) {
@@ -125,7 +156,7 @@ void print_header(ostream& os) {
 	fmt::fprintf(os, "                  ************************************************************** \n");
 	fmt::fprintf(os, "                  ***                                                        *** \n");
 	fmt::fprintf(os, "                  ***                        ORCA_LED                        *** \n");
-	fmt::fprintf(os, "                  ***                       v1.2 07/21                       *** \n");
+	fmt::fprintf(os, "                  ***                       v1.4 10/21                       *** \n");
 	fmt::fprintf(os, "                  ***                                                        *** \n");
 	fmt::fprintf(os, "                  ************************************************************** \n");
 	fmt::fprintf(os, "\n");
@@ -321,6 +352,7 @@ void do_intra(const Dimer& dim, std::ostream& os, ostream& csv) {
 void do_inter(const Dimer& dim, std::ostream& os, ostream& csv) {
 
 	string tmp{};
+	map<tuple<int,int>, double> inters;
 
 	fmt::fprintf(os, "\n");
 	fmt::fprintf(os, "\n");
@@ -347,6 +379,7 @@ void do_inter(const Dimer& dim, std::ostream& os, ostream& csv) {
 			percent=abs(dim.hfint[N])/(abs(dim.ccint[N])+abs(dim.hfint[N])) * 100;
 			tmp=fmt::format("Interaction between fragments {} and {}:", i, j);
 			fmt::fprintf(os, fs9, tmp, dim.hfint[N], percent, dim.ccint[N], 100-percent);
+			inters[make_tuple(i,j)] = totint[N];
 
 			/*tmp=fmt::format("TotalInt_{}_{}:,", i, j);
 			fmt::fprintf(csv, fs4, tmp, dim.fragccDispstrong[N]); */
@@ -368,7 +401,6 @@ void do_inter(const Dimer& dim, std::ostream& os, ostream& csv) {
 	os << "\n";
 	os << "\n";
 
-	N=0;
 	for(int i=1;i<=dim.nfrag;++i) {
 		os << left << setw(9) << "Fragment" << setw(31) << i;
 		for(int j=1;j<=dim.nfrag;++j) {
@@ -377,10 +409,9 @@ void do_inter(const Dimer& dim, std::ostream& os, ostream& csv) {
 			else if(j<i)
 				os << left << setw(14) <<  setprecision(5) << " ";
 			else {
-				os << left << setw(14) << setprecision(5) << totint[N];
+				os << left << setw(14) << setprecision(5) << inters[make_tuple(j,i)];
 				tmp=fmt::format("TotalInt_{}_{}:,", i, j);
-				fmt::fprintf(csv, fs4, tmp, totint[N]);
-				++N;
+				fmt::fprintf(csv, fs4, tmp, inters[make_tuple(j,i)]);
 			}
 		}
 		os << endl;
@@ -1189,7 +1220,7 @@ void do_comparison(const vector<string>& v1, const vector<string>& v2, bool geop
 			if(secondrun==false) {
 				for(int j=0;j<nvalue;++j) {
 					line=v1[i+3+j];
-					split(res, line, is_any_of(" "), token_compress_on);
+					split(res, line);
 					sum1[res[0]]=stod(res[1]);
 					insertOrder.push_back(res[0]);
 				}
@@ -1198,7 +1229,7 @@ void do_comparison(const vector<string>& v1, const vector<string>& v2, bool geop
 			if(secondrun==true) {
 				for(int j=0;j<nvalue;++j) {
 					line=v1[i+3+j];
-					split(res, line, is_any_of(" "), token_compress_on);
+					split(res, line);
 					sum3[res[0]]=stod(res[1]);
 					insertOrder2.push_back(res[0]);
 				}
@@ -1217,7 +1248,7 @@ void do_comparison(const vector<string>& v1, const vector<string>& v2, bool geop
 			if(secondrun==false) {
 				for(int j=0;j<nvalue;++j) {
 					line=v2[i+3+j];
-					split(res, line, is_any_of(" "), token_compress_on);
+					split(res, line);
 					sum2[res[0]]=stod(res[1]);
 				}
 			}
@@ -1225,7 +1256,7 @@ void do_comparison(const vector<string>& v1, const vector<string>& v2, bool geop
 			if(secondrun==true) {
 				for(int j=0;j<nvalue;++j) {
 					line=v2[i+3+j];
-					split(res, line, is_any_of(" "), token_compress_on);
+					split(res, line);
 					sum4[res[0]]=stod(res[1]);
 				}
 				break;

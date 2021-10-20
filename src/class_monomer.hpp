@@ -14,9 +14,6 @@
 #include <fstream>
 #include <exception>
 
-#include <boost/algorithm/string.hpp>
-#include <boost/format.hpp>
-
 class Monomer {
 public:
 	int nel = 0;

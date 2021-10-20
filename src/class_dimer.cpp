@@ -6,9 +6,9 @@
  */
 
 #include "class_dimer.hpp"
+#include "functions.hpp"
 
 using namespace std;
-using namespace boost;
 
 Dimer::Dimer(string argv) {
 	ifstream dimer(argv);
@@ -24,7 +24,6 @@ Dimer::Dimer(string argv) {
 	string s{}, line{};
 	vector<string> res{};
 	size_t found{};
-	int ifrag{};
 
 	while(getline(dimer, s))
 		file.push_back(s);
@@ -49,8 +48,8 @@ Dimer::Dimer(string argv) {
 	for(string line:file) {
 		found = line.find(s);
 		if(found!=string::npos) {
-			split(res, line, is_any_of(" "), token_compress_on);
-			nel=stoi(res[6]);
+			split(res, line);
+			nel=stoi(res[5]);
 			break;
 		}
 	}
@@ -60,7 +59,7 @@ Dimer::Dimer(string argv) {
 	for(string line:file) {
 		found = line.find(s);
 		if(found!=string::npos) {
-			split(res, line, is_any_of(" "), token_compress_on);
+			split(res, line);
 			nbasis=stoi(res[5]);
 			break;
 		}
@@ -71,8 +70,8 @@ Dimer::Dimer(string argv) {
 	for(string line:file) {
 		found=line.find(s);
 		if(found!=string::npos) {
-			split(res, line, is_any_of(" "), token_compress_on);
-			hftype=res[5];
+			split(res, line);
+			hftype=res[4];
 		}
 	}
 
@@ -81,7 +80,7 @@ Dimer::Dimer(string argv) {
 	for(string line:file) {
 		found = line.find(s);
 		if(found!=string::npos) {
-			split(res, line, is_any_of(" "), token_compress_on);
+			split(res, line);
 			ehf=stod(res[2]);
 			break;
 		}
@@ -94,7 +93,7 @@ Dimer::Dimer(string argv) {
 		found = line.find(s);
 		if(found!=string::npos) {
 			line=file[i+7];
-			split(res, line, is_any_of(" "), token_compress_on);
+			split(res, line);
 			eref=stod(res[3]);
 			break;
 		}
@@ -116,7 +115,7 @@ Dimer::Dimer(string argv) {
 		for(string line:file) {
 			found = line.find(s);
 			if(found!=string::npos) {
-				split(res, line, is_any_of(" "), token_compress_on);
+				split(res, line);
 				eccsd=stod(res[2]);
 				break;
 			}
@@ -130,7 +129,7 @@ Dimer::Dimer(string argv) {
 		for(string line:file) {
 			found = line.find(s);
 			if(found!=string::npos) {
-				split(res, line, is_any_of(" "), token_compress_on);
+				split(res, line);
 				eccsdt=stod(res[2]);
 				break;
 			}
@@ -148,7 +147,7 @@ Dimer::Dimer(string argv) {
 		for(string line:file) {
 			found=line.find(s);
 			if(found!=string::npos) {
-				split(res, line, is_any_of(" "), token_compress_on);
+				split(res, line);
 				eccsd=stod(res[2]);
 				break;
 			}
@@ -164,23 +163,20 @@ Dimer::Dimer(string argv) {
 	for(string line:file) {
 		found = line.find(s);
 		if(found!=string::npos) {
-			split(res, line, is_any_of(" "), token_compress_on);
+			split(res, line);
 			nfrag=stoi(res[4]);
 		}
 	}
 
 	// FRAGEHF
 	for(int i=0;i<nfrag;++i) {
-		format frmt("INTRA-FRAGMENT REF. ENERGY FOR FRAGMENT   %1%");
-		ifrag=i+1;
-		frmt % ifrag;
-		s = frmt.str();
+		s=fmt::format("INTRA-FRAGMENT REF. ENERGY FOR FRAGMENT   {}", i+1);
 		for(size_t j=0;j<file.size();++j) {
 			line=file[j];
 			found=line.find(s);
 			if(found!=string::npos) {
 				line = file[j+7];
-				split(res, line, is_any_of(" "), token_compress_on);
+				split(res, line);
 				fragehf.push_back(stod(res[3]));
 				break;
 			}
@@ -190,25 +186,25 @@ Dimer::Dimer(string argv) {
 	//FRAGHFJ, FRAGHFK, FRAGCCDISP
 	for(int i=2;i<=nfrag;++i) {
 		for(int j=1;j<i;++j) {
-			s = str(format("Interaction of fragments  %1% and  %2%") % i % j );
+			s = fmt::format("Interaction of fragments  {} and  {}", i, j);
 			for(size_t k=0;k<file.size();++k) {
 				line=file[k];
 				found=line.find(s);
 				if(found!=string::npos) {
 					line=file[k+1];
-					split(res, line, is_any_of(" "), token_compress_on);
+					split(res, line);
 					fraghfJ.push_back(stod(res[2]));
 
 					line=file[k+2];
-					split(res, line, is_any_of(" "), token_compress_on);
+					split(res, line);
 					fraghfK.push_back(stod(res[2]));
 
 					line=file[k+3];
-					split(res, line, is_any_of(" "), token_compress_on);
+					split(res, line);
 					fragccDispstrong.push_back(stod(res[3]));
 
 					line=file[k+4];
-					split(res, line, is_any_of(" "), token_compress_on);
+					split(res, line);
 					fragccDispweak.push_back(stod(res[3]));
 					break;
 				}
@@ -228,11 +224,11 @@ Dimer::Dimer(string argv) {
 		found=line.find(s);
 		if(found!=string::npos) {
 			line=file[i+1];
-			split(res, line, is_any_of(" "), token_compress_on);
+			split(res, line);
 			nondispStrong = stod(res[4]);
 
 			line=file[i+2];
-			split(res, line, is_any_of(" "), token_compress_on);
+			split(res, line);
 			nondispWeak = stod(res[4]);
 			break;
 		}
@@ -242,9 +238,9 @@ Dimer::Dimer(string argv) {
 	for(int i=2;i<=nfrag;++i) {
 		for(int j=1;j<i;++j) {
 			if(hftype=="RHF")
-				s = str(format("Interaction correlation for Fragments   %1% and   %2%:") % i % j );
+				s = fmt::format("Interaction correlation for Fragments   {} and   {}:",i, j);
 			else if(hftype=="UHF")
-				s = str(format("Interaction correlation for Fragments   %1% and  %2%:") % i % j );
+				s = fmt::format("Interaction correlation for Fragments   {} and  {}:",i, j);
 			else
 				throw runtime_error("Unknown HFType");
 
@@ -253,14 +249,14 @@ Dimer::Dimer(string argv) {
 				found=line.find(s);
 				if(found!=string::npos) {
 					line=file[k+2];
-					split(res, line, is_any_of(" "), token_compress_on);
+					split(res, line);
 					fragInterstrong.push_back(stod(res[3]));
 
 					int test=-1;
 					if(triples) {
 						test=0;
 						line=file[k+3+test];
-						split(res, line, is_any_of(" "), token_compress_on);
+						split(res, line);
 						fragIntertriples.push_back(stod(res[2]));
 					}
 					else {
@@ -269,7 +265,7 @@ Dimer::Dimer(string argv) {
 
 
 					line=file[k+4+test];
-					split(res, line, is_any_of(" "), token_compress_on);
+					split(res, line);
 					fragInterweak.push_back(stod(res[3]));
 					break;
 				}
@@ -312,7 +308,7 @@ Dimer::Dimer(string argv) {
 		found=line.find(s);
 		if(found!=string::npos) {
 			line=file[j+5];
-			split(res, line, is_any_of(" "), token_compress_on);
+			split(res, line);
 			for(int i=0;i<nfrag;++i) {
 				fragIntrastrong.push_back(stod(res[3+i]));
 			}
@@ -322,7 +318,7 @@ Dimer::Dimer(string argv) {
 			if(triples) {
 				test=0;
 				line=file[j+6];
-				split(res, line, is_any_of(" "), token_compress_on);
+				split(res, line);
 				for(int i=0;i<nfrag;++i) {
 					fragIntratriples.push_back(stod(res[2+i]));
 				}
@@ -334,13 +330,13 @@ Dimer::Dimer(string argv) {
 			}
 
 			line=file[j+7+test];
-			split(res, line, is_any_of(" "), token_compress_on);
+			split(res, line);
 			for(int i=0;i<nfrag;++i) {
 				fragIntraweak.push_back(stod(res[3+i]));
 			}
 
 			line=file[j+8+test];
-			split(res, line, is_any_of(" "), token_compress_on);
+			split(res, line);
 			for(int i=0;i<nfrag;++i) {
 				fragIntrasingles.push_back(stod(res[2+i]));
 			}
@@ -370,7 +366,7 @@ Dimer::Dimer(string argv) {
 	for(string line:file) {
 		found = line.find(s);
 		if(found!=string::npos) {
-			split(res, line, is_any_of(" "), token_compress_on);
+			split(res, line);
 			delocalizedtriples=stod(res[3]);
 			break;
 		}
@@ -381,7 +377,7 @@ Dimer::Dimer(string argv) {
 	for(string line:file) {
 		found = line.find(s);
 		if(found!=string::npos) {
-			split(res, line, is_any_of(" "), token_compress_on);
+			split(res, line);
 			delocalizedstrongpairs=stod(res[2]);
 			break;
 		}
