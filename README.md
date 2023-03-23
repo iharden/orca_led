@@ -73,3 +73,11 @@ Tested with `ORCA 5.0`. Precompiled binaries for Ubuntu and Windows 10 are stati
 
 ## Contributor
 contributed by Ingolf Harden
+
+## License
+
+orca_led is free software: you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+
+orca_led is distributed in the hope that it will be useful, but without any warranty; without even the implied warranty of merchantability or fitness for a particular purpose. See the GNU Lesser General Public License for more details.
+
+Unless you explicitly state otherwise, any contribution intentionally submitted for inclusion in orca_led by you, as defined in the GNU Lesser General Public license, shall be licensed as above, without any additional terms or conditions
