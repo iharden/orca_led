@@ -62,7 +62,6 @@ public:
 	double delocalizedstrongpairs{};
 	double delocalizedtriples{};
 
-	Dimer();
 	Dimer(std::string_view argv);
 };
 

@@ -28,7 +28,6 @@ public:
 	double et = 0;
 	double ecorrt = 0;
 
-	Monomer();
 	Monomer(std::string_view argv);
 };
 
