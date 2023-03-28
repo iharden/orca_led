@@ -13,6 +13,7 @@
 #include <string>
 #include <fstream>
 #include <exception>
+#include <string_view>
 
 class Monomer {
 public:
@@ -28,7 +29,7 @@ public:
 	double ecorrt = 0;
 
 	Monomer();
-	Monomer(std::string argv);
+	Monomer(std::string_view argv);
 };
 
 

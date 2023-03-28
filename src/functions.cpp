@@ -31,36 +31,37 @@ double get_time(chrono::time_point<chrono::high_resolution_clock>  start, chrono
 	return elapsed.count();
 }
 
-void split(std::vector<std::string>& res, std::string& str) {
+void split(std::vector<std::string_view>& res, const std::string& str) {
 
 	res.clear();
+	string_view sv{str};
     // Remove leading white spaces
-    while(str[0] == ' ') {
-    	str=str.substr(1);
+    while(sv[0] == ' ') {
+    	sv=sv.substr(1);
     }
     // Remove final white spaces
-    while(str[str.size()-1] == ' ')
-    	str=str.substr(0,str.size()-1);
+    while(sv[sv.size()-1] == ' ')
+    	sv=sv.substr(0,sv.size()-1);
 
     size_t start=0;
     size_t end=0;
 
-	while(str.find_first_of(' ', start) != string::npos) {
+	while(sv.find_first_of(' ', start) != string_view::npos) {
 
-		end = str.find_first_of(' ', start);
-		if(str[end+1] != ' ') {
-			res.push_back(str.substr(start, end-start));
+		end = sv.find_first_of(' ', start);
+		if(sv[end+1] != ' ') {
+			res.push_back(sv.substr(start, end-start));
 			start=end+1;
 		}
 		else {
-			res.push_back(str.substr(start,end-start));
-			while(str[end+1] == ' ') {
+			res.push_back(sv.substr(start,end-start));
+			while(sv[end+1] == ' ') {
 				++end;
 			}
 			start=end+1;
 		}
     }
-	res.push_back(str.substr(start,str.size()));
+	res.push_back(sv.substr(start,sv.size()));
 }
 
 void do_led(const Dimer& dim, ostream& os, ostream& csv) {
@@ -140,7 +141,7 @@ void do_approachtwo(const Dimer& dim, vector<Monomer>& mons, ostream& os, map<st
 	do_summary(os, summary, insertOrder, csv);
 }
 
-void do_compare(const vector<string> comps, ostream& os, ostream& csv) {
+void do_compare(const vector<string_view>& comps, ostream& os, ostream& csv) {
 
 	print_header(os);
 	auto [v1,v2] = do_startup(comps,os);
@@ -352,7 +353,6 @@ void do_intra(const Dimer& dim, std::ostream& os, ostream& csv) {
 void do_inter(const Dimer& dim, std::ostream& os, ostream& csv) {
 
 	string tmp{};
-	map<tuple<int,int>, double> inters;
 
 	fmt::fprintf(os, "\n");
 	fmt::fprintf(os, "\n");
@@ -373,6 +373,7 @@ void do_inter(const Dimer& dim, std::ostream& os, ostream& csv) {
 
 	int N=0;
 	double percent=0;
+	map<tuple<int,int>, double> inters;
 
 	for(int i=2;i<=dim.nfrag;++i) {
 		for(int j=1;j<i;++j) {
@@ -957,7 +958,7 @@ void do_nondispint(const Dimer& dim, vector<Monomer>& mons, ostream& os, map<str
 
 	/*
 	 EXY NONDISP = EXY int - EXY DISP (SP,WP,TP) - EXYJ -EXYK
-	 This term contains both inter and intrafragment contribution
+	 EXY int - EXYJ - EXYK should be just EXY int (CC)
 	 For the calculation of Elprep(corr) we used all intra-excitations
 	 */
 	fmt::fprintf(os, "\n");
@@ -1121,15 +1122,15 @@ void do_summary(ostream& os, map<string, double>& summary, vector<string>& inser
 	fmt::fprintf(csv, "\n");
 }
 
-tuple<vector<string>,vector<string>> do_startup(const vector<string>& comps, ostream& os) {
+tuple<vector<string>,vector<string>> do_startup(const vector<string_view>& comps, ostream& os) {
 
 	if(comps.size()!=2) {
-		cout << "You have to specify exactly two .led files \n";
+		cerr << "You have to specify exactly two .led files \n";
 		throw runtime_error("Number of arguments is wrong");
 	}
 
-	ifstream f1{comps[0]};
-	ifstream f2{comps[1]};
+	ifstream f1{string{comps[0]}};
+	ifstream f2{string{comps[1]}};
 
 	if(!f1 || !f2)
 		throw runtime_error("do_compare():File not found");
@@ -1156,20 +1157,17 @@ tuple<vector<string>,vector<string>> do_startup(const vector<string>& comps, ost
 
 bool check_geoprep(const std::vector<std::string>& v1, const std::vector<std::string>& v2) {
 
-	size_t found{};
 	string s="E(Geo-prep)";
 	vector<bool> geoprep{false,false};
 	for(string line:v1) {
-		found=line.find(s);
-		if(found!=string::npos) {
+		if(line.find(s)!=string::npos) {
 			geoprep[0]=true;
 			break;
 		}
 	}
 
 	for(string line:v2) {
-		found=line.find(s);
-		if(found!=string::npos) {
+		if(line.find(s)!=string::npos) {
 			geoprep[1]=true;
 			break;
 		}
@@ -1185,13 +1183,10 @@ bool check_geoprep(const std::vector<std::string>& v1, const std::vector<std::st
 		throw runtime_error("do_compare():Inconsistency found");
 	}
 
-	bool geoprepflag;
 	if(geoprep[0]==true)
-		geoprepflag=true;
+		return true;
 	else
-		geoprepflag=false;
-
-	return geoprepflag;
+		return false;
 }
 
 void do_comparison(const vector<string>& v1, const vector<string>& v2, bool geoprepflag, ostream& os, ostream& csv) {
@@ -1204,11 +1199,11 @@ void do_comparison(const vector<string>& v1, const vector<string>& v2, bool geop
 	else
 		nvalue=6;
 
-	map<string, double> sum1{}, sum2{}, sum3{}, sum4{};
+	map<string_view, double> sum1{}, sum2{}, sum3{}, sum4{};
 	string s{}, line{};
 
-	vector<string> res{};
-	vector<string> insertOrder{}, insertOrder2{};
+	vector<string_view> res{};
+	vector<string_view> insertOrder{}, insertOrder2{};
 
 	bool secondrun=false;
 
@@ -1221,7 +1216,7 @@ void do_comparison(const vector<string>& v1, const vector<string>& v2, bool geop
 				for(int j=0;j<nvalue;++j) {
 					line=v1[i+3+j];
 					split(res, line);
-					sum1[res[0]]=stod(res[1]);
+					sum1[res[0]]=stod(string{res[1]});
 					insertOrder.push_back(res[0]);
 				}
 			}
@@ -1230,7 +1225,7 @@ void do_comparison(const vector<string>& v1, const vector<string>& v2, bool geop
 				for(int j=0;j<nvalue;++j) {
 					line=v1[i+3+j];
 					split(res, line);
-					sum3[res[0]]=stod(res[1]);
+					sum3[res[0]]=stod(string{res[1]});
 					insertOrder2.push_back(res[0]);
 				}
 				break;
@@ -1249,7 +1244,7 @@ void do_comparison(const vector<string>& v1, const vector<string>& v2, bool geop
 				for(int j=0;j<nvalue;++j) {
 					line=v2[i+3+j];
 					split(res, line);
-					sum2[res[0]]=stod(res[1]);
+					sum2[res[0]]=stod(string{res[1]});
 				}
 			}
 
@@ -1257,7 +1252,7 @@ void do_comparison(const vector<string>& v1, const vector<string>& v2, bool geop
 				for(int j=0;j<nvalue;++j) {
 					line=v2[i+3+j];
 					split(res, line);
-					sum4[res[0]]=stod(res[1]);
+					sum4[res[0]]=stod(string{res[1]});
 				}
 				break;
 			}

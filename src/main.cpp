@@ -4,8 +4,10 @@
  *  Created on: Dec 21, 2020
  *      Author: iharden
  */
-#include <thread>
+
+#include <future>
 #include <algorithm>
+#include <string_view>
 #include "class_monomer.hpp"
 #include "class_dimer.hpp"
 #include "functions.hpp"
@@ -18,12 +20,12 @@ int main(int argc, char* argv[]) {
 
 	string dimername{};
 	string tmp{};
-	vector<string> monomers{};
-	vector<string> comps{};
+	vector<string_view> monomers{};
+	vector<string_view> comps{};
 
-	vector<string> cmd_arg{};
+	vector<string_view> cmd_arg{};
 	for(int i=1;i<argc;++i)
-		cmd_arg.push_back(argv[i]);
+		cmd_arg.emplace_back(argv[i]);
 
 	if((find(cmd_arg.begin(), cmd_arg.end(), "-h") != cmd_arg.end()) || (find(cmd_arg.begin(), cmd_arg.end(), "--help") != cmd_arg.end())){
 		cout << "______________________________________________________________________________________________________________________________ \n";
@@ -65,7 +67,7 @@ int main(int argc, char* argv[]) {
 
 		ofstream oss{"comparison.led"};
 		ofstream csv{"comparison.csv"};
-		do_compare(comps, oss, csv);
+		//do_compare(comps, oss, csv);
 		ttotalend = chrono::high_resolution_clock::now();
 		oss << "Total computation time: " << get_time(ttotalstart, ttotalend) << " ms\n";
 		oss.close();
@@ -100,15 +102,21 @@ int main(int argc, char* argv[]) {
 	// CALL CONSTRUCTORS FOR INPUT FILES
 	tstart = chrono::high_resolution_clock::now();
 
-	vector<Monomer> mons;
-	thread do_work([&mons] (vector<string> monomers) {
-		if(monomers.size() != 0) {
-			for(string s : monomers)
-				mons.push_back(Monomer(s));
-		}
-	},monomers);
+	vector<Monomer> mons{};
+	/*future<void> fut = async([&mons, &monomers] () {
+		for(string_view s:monomers)
+			mons.emplace_back(s);
+	});*/
+
+	vector<future<Monomer>> futs;
+	for(const auto& monomer : monomers) {
+		futs.push_back(async([](const auto& mon) {return Monomer(mon);},monomer));
+	}
+
 	Dimer dimer(dimername);
-	do_work.join();
+	for(auto& fut:futs)
+		mons.push_back(fut.get());
+	//fut.get();
 
 	tend = chrono::high_resolution_clock::now();
 	cout << "Time for building data structures: " << get_time(tstart, tend) << "ms \n";
@@ -146,5 +154,6 @@ int main(int argc, char* argv[]) {
 	os << "Total computation time: " << get_time(ttotalstart, ttotalend) << " ms\n";
 	os.close();
 	csv.close();
+
 }
 

@@ -7,11 +7,11 @@
 
 #include "class_dimer.hpp"
 #include "functions.hpp"
-
+//#include <format>
 using namespace std;
 
-Dimer::Dimer(string argv) {
-	ifstream dimer(argv);
+Dimer::Dimer(string_view argv) {
+	ifstream dimer(string{argv});
 	if(!dimer) {
 		cerr << "Could not find file " << argv << endl;
 		throw runtime_error("File not found");
@@ -21,89 +21,81 @@ Dimer::Dimer(string argv) {
 	name=argv;
 
 	vector<string> file{};
-	string s{}, line{};
-	vector<string> res{};
-	size_t found{};
+	string line{}, s{};
+	vector<string_view> res{};
 
-	while(getline(dimer, s))
-		file.push_back(s);
+	while(getline(dimer, line))
+		file.push_back(line);
 
+	string_view sv;
 	// IS LED PRESENT?
-	s = "LOCAL ENERGY DECOMPOSITION FOR DLPNO-CC METHODS";
+	sv = "LOCAL ENERGY DECOMPOSITION FOR DLPNO-CC METHODS";
 	bool led=false;
-	for(string line:file) {
-		found=line.find(s);
-		if(found!=string::npos) {
+	for(const string& line:file) {
+		if(line.find(sv)!=string::npos) {
 			led=true;
 			break;
 		}
 	}
 	if(led==false) {
-		cout << "File corrupted! No LED section in Dimer file found. Please try again \n";
+		cerr << "File corrupted! No LED section in Dimer file found. Please try again \n";
 		throw runtime_error("File corrupted");
 	}
 
 	// NUMBER OF ELECTRONS
-	s = "Number of Electrons";
-	for(string line:file) {
-		found = line.find(s);
-		if(found!=string::npos) {
+	sv = "Number of Electrons";
+	for(const string& line:file) {
+		if(line.find(sv)!=string::npos) {
 			split(res, line);
-			nel=stoi(res[5]);
+			nel=stoi(string{res[5]});
 			break;
 		}
 	}
 
 	// NUMBER OF BASIS FUNCTIONS
-	s = "Number of basis functions";
-	for(string line:file) {
-		found = line.find(s);
-		if(found!=string::npos) {
+	sv = "Number of basis functions";
+	for(const string& line:file) {
+		if(line.find(sv)!=string::npos) {
 			split(res, line);
-			nbasis=stoi(res[5]);
+			nbasis=stoi(string{res[5]});
 			break;
 		}
 	}
 
 	// HFTYPE
-	s="Hartree-Fock type";
-	for(string line:file) {
-		found=line.find(s);
-		if(found!=string::npos) {
+	sv="Hartree-Fock type";
+	for(const string& line:file) {
+		if(line.find(sv)!=string::npos) {
 			split(res, line);
-			hftype=res[4];
+			hftype=string{res[4]};
 		}
 	}
 
 	// EHF
-	s = "E(0)";
-	for(string line:file) {
-		found = line.find(s);
-		if(found!=string::npos) {
+	sv = "E(0)";
+	for(const string& line:file) {
+		if(line.find(sv)!=string::npos) {
 			split(res, line);
-			ehf=stod(res[2]);
+			ehf=stod(string{res[2]});
 			break;
 		}
 	}
 
 	//EHF USED FOR LED ANALYSIS
-	s="REFERENCE ENERGY E(0) DECOMPOSITION (Eh)";
+	sv="REFERENCE ENERGY E(0) DECOMPOSITION (Eh)";
 	for(size_t i=0;i<file.size();++i) {
-		line=file[i];
-		found = line.find(s);
-		if(found!=string::npos) {
+		if(file[i].find(sv)!=string::npos) {
 			line=file[i+7];
 			split(res, line);
-			eref=stod(res[3]);
+			eref=stod(string{res[3]});
 			break;
 		}
 	}
 
-	s="DLPNO BASED TRIPLES CORRECTION";
+	sv="DLPNO BASED TRIPLES CORRECTION";
 	bool triples=false;
-	for(string line:file) {
-		found=line.find(s);
-		if(found!=string::npos) {
+	for(const string& line:file) {
+		if(line.find(sv)!=string::npos) {
 			triples=true;
 			break;
 		}
@@ -111,12 +103,11 @@ Dimer::Dimer(string argv) {
 
 	if(triples==true) {
 	// E(CCSD)
-		s = "E(CCSD)";
-		for(string line:file) {
-			found = line.find(s);
-			if(found!=string::npos) {
+		sv = "E(CCSD)";
+		for(const string& line:file) {
+			if(line.find(sv)!=string::npos) {
 				split(res, line);
-				eccsd=stod(res[2]);
+				eccsd=stod(string{res[2]});
 				break;
 			}
 		}
@@ -125,12 +116,11 @@ Dimer::Dimer(string argv) {
 		ecorr=eccsd-ehf;
 
 		// E(CCSD(T))
-		s = "E(CCSD(T))";
-		for(string line:file) {
-			found = line.find(s);
-			if(found!=string::npos) {
+		sv = "E(CCSD(T))";
+		for(const string& line:file) {
+			if(line.find(sv)!=string::npos) {
 				split(res, line);
-				eccsdt=stod(res[2]);
+				eccsdt=stod(string{res[2]});
 				break;
 			}
 		}
@@ -143,12 +133,11 @@ Dimer::Dimer(string argv) {
 
 	else {
 		// GET E(CCSD) IF NO TRIPLES ARE CALCULATED
-		s="E(TOT)";
-		for(string line:file) {
-			found=line.find(s);
-			if(found!=string::npos) {
+		sv="E(TOT)";
+		for(const string& line:file) {
+			if(line.find(sv)!=string::npos) {
 				split(res, line);
-				eccsd=stod(res[2]);
+				eccsd=stod(string{res[2]});
 				break;
 			}
 		}
@@ -159,12 +148,11 @@ Dimer::Dimer(string argv) {
 	}
 
 	// NUMBER OF FRAGMENTS
-	s = "Number of fragments";
-	for(string line:file) {
-		found = line.find(s);
-		if(found!=string::npos) {
+	sv = "Number of fragments";
+	for(const string& line:file) {
+		if(line.find(sv)!=string::npos) {
 			split(res, line);
-			nfrag=stoi(res[4]);
+			nfrag=stoi(string{res[4]});
 		}
 	}
 
@@ -172,12 +160,10 @@ Dimer::Dimer(string argv) {
 	for(int i=0;i<nfrag;++i) {
 		s=fmt::format("INTRA-FRAGMENT REF. ENERGY FOR FRAGMENT   {}", i+1);
 		for(size_t j=0;j<file.size();++j) {
-			line=file[j];
-			found=line.find(s);
-			if(found!=string::npos) {
+			if(file[j].find(s)!=string::npos) {
 				line = file[j+7];
 				split(res, line);
-				fragehf.push_back(stod(res[3]));
+				fragehf.push_back(stod(string{res[3]}));
 				break;
 			}
 		}
@@ -188,24 +174,22 @@ Dimer::Dimer(string argv) {
 		for(int j=1;j<i;++j) {
 			s = fmt::format("Interaction of fragments  {} and  {}", i, j);
 			for(size_t k=0;k<file.size();++k) {
-				line=file[k];
-				found=line.find(s);
-				if(found!=string::npos) {
+				if(file[k].find(s)!=string::npos) {
 					line=file[k+1];
 					split(res, line);
-					fraghfJ.push_back(stod(res[2]));
+					fraghfJ.push_back(stod(string{res[2]}));
 
 					line=file[k+2];
 					split(res, line);
-					fraghfK.push_back(stod(res[2]));
+					fraghfK.push_back(stod(string{res[2]}));
 
 					line=file[k+3];
 					split(res, line);
-					fragccDispstrong.push_back(stod(res[3]));
+					fragccDispstrong.push_back(stod(string{res[3]}));
 
 					line=file[k+4];
 					split(res, line);
-					fragccDispweak.push_back(stod(res[3]));
+					fragccDispweak.push_back(stod(string{res[3]}));
 					break;
 				}
 			}
@@ -218,18 +202,16 @@ Dimer::Dimer(string argv) {
 	}
 
 	// SUM OF NONDISPERSION (STRONG PAIRS AND WEAK PAIRS)
-	s = "Sum of non dispersive correlation terms:";
+	sv = "Sum of non dispersive correlation terms:";
 	for(size_t i=0;i<file.size();++i) {
-		line=file[i];
-		found=line.find(s);
-		if(found!=string::npos) {
+		if(file[i].find(sv)!=string::npos) {
 			line=file[i+1];
 			split(res, line);
-			nondispStrong = stod(res[4]);
+			nondispStrong = stod(string{res[4]});
 
 			line=file[i+2];
 			split(res, line);
-			nondispWeak = stod(res[4]);
+			nondispWeak = stod(string{res[4]});
 			break;
 		}
 	}
@@ -245,19 +227,17 @@ Dimer::Dimer(string argv) {
 				throw runtime_error("Unknown HFType");
 
 			for(size_t k=0;k<file.size();++k) {
-				line=file[k];
-				found=line.find(s);
-				if(found!=string::npos) {
+				if(file[k].find(s)!=string::npos) {
 					line=file[k+2];
 					split(res, line);
-					fragInterstrong.push_back(stod(res[3]));
+					fragInterstrong.push_back(stod(string{res[3]}));
 
 					int test=-1;
 					if(triples) {
 						test=0;
 						line=file[k+3+test];
 						split(res, line);
-						fragIntertriples.push_back(stod(res[2]));
+						fragIntertriples.push_back(stod(string{res[2]}));
 					}
 					else {
 						fragIntertriples.push_back(0.0);
@@ -266,7 +246,7 @@ Dimer::Dimer(string argv) {
 
 					line=file[k+4+test];
 					split(res, line);
-					fragInterweak.push_back(stod(res[3]));
+					fragInterweak.push_back(stod(string{res[3]}));
 					break;
 				}
 			}
@@ -302,15 +282,13 @@ Dimer::Dimer(string argv) {
 	}
 
 	// GET ALL THE INTRA CONTRIBUTIONS (STRONG PAIRS, WEAK PAIRS, TRIPLES AND SINGLES)
-	s="INTER- vs INTRA-FRAGMENT CORRELATION ENERGIES (Eh)";
+	sv="INTER- vs INTRA-FRAGMENT CORRELATION ENERGIES (Eh)";
 	for(size_t j=0;j<file.size();++j) {
-		line=file[j];
-		found=line.find(s);
-		if(found!=string::npos) {
+		if(file[j].find(sv)!=string::npos) {
 			line=file[j+5];
 			split(res, line);
 			for(int i=0;i<nfrag;++i) {
-				fragIntrastrong.push_back(stod(res[3+i]));
+				fragIntrastrong.push_back(stod(string{res[3+i]}));
 			}
 
 			// ONLY PRESENT IF TRIPLES ARE AROUND!!!
@@ -320,7 +298,7 @@ Dimer::Dimer(string argv) {
 				line=file[j+6];
 				split(res, line);
 				for(int i=0;i<nfrag;++i) {
-					fragIntratriples.push_back(stod(res[2+i]));
+					fragIntratriples.push_back(stod(string{res[2+i]}));
 				}
 			}
 			else {
@@ -332,13 +310,13 @@ Dimer::Dimer(string argv) {
 			line=file[j+7+test];
 			split(res, line);
 			for(int i=0;i<nfrag;++i) {
-				fragIntraweak.push_back(stod(res[3+i]));
+				fragIntraweak.push_back(stod(string{res[3+i]}));
 			}
 
 			line=file[j+8+test];
 			split(res, line);
 			for(int i=0;i<nfrag;++i) {
-				fragIntrasingles.push_back(stod(res[2+i]));
+				fragIntrasingles.push_back(stod(string{res[2+i]}));
 			}
 			break;
 		}
@@ -362,23 +340,21 @@ Dimer::Dimer(string argv) {
 	}
 
 	// DELOCALIZED TRIPLES
-	s="Delocalized correction (triples)";
-	for(string line:file) {
-		found = line.find(s);
-		if(found!=string::npos) {
+	sv="Delocalized correction (triples)";
+	for(const string& line:file) {
+		if(line.find(sv)!=string::npos) {
 			split(res, line);
-			delocalizedtriples=stod(res[3]);
+			delocalizedtriples=stod(string{res[3]});
 			break;
 		}
 	}
 
 	// DELOCALIZED Strong-pairs
-	s="Delocalized correlation";
-	for(string line:file) {
-		found = line.find(s);
-		if(found!=string::npos) {
+	sv="Delocalized correlation";
+	for(const string& line:file) {
+		if(line.find(sv)!=string::npos) {
 			split(res, line);
-			delocalizedstrongpairs=stod(res[2]);
+			delocalizedstrongpairs=stod(string{res[2]});
 			break;
 		}
 	}

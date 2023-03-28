@@ -13,7 +13,7 @@
 #include <fstream>
 #include <vector>
 #include <exception>
-
+#include <string_view>
 class Dimer {
 public:
 	int nel = 0;
@@ -63,7 +63,7 @@ public:
 	double delocalizedtriples{};
 
 	Dimer();
-	Dimer(std::string argv);
+	Dimer(std::string_view argv);
 };
 
 

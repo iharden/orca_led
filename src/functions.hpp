@@ -28,10 +28,10 @@
 
 // FUNCTIONS CALLED IN MAIN() OR HELPING FUNCTIONS
 double get_time(std::chrono::time_point<std::chrono::high_resolution_clock>  start, std::chrono::time_point<std::chrono::high_resolution_clock> finish);
-void split(std::vector<std::string>& res, std::string& str);
+void split(std::vector<std::string_view>& res, const std::string& str);
 void do_led(const Dimer& dim, std::ostream& os, std::ostream& csv);
 void do_led(const Dimer& dim, std::vector<Monomer>& mons, std::ostream& os, std::ostream& csv);
-void do_compare(const std::vector<std::string> comps, std::ostream& os, std::ostream& csv);
+void do_compare(const std::vector<std::string_view>& comps, std::ostream& os, std::ostream& csv);
 
 // FUNCTIONS CALLED IN DO_LED(DIM)
 void print_header(std::ostream& os);
@@ -74,7 +74,7 @@ void do_consistency(const Dimer& dim, std::vector<Monomer>& mons, std::ostream& 
 void do_summary(std::ostream& os, std::map<std::string,double>& summary, std::vector<std::string>& insertOrder, std::ostream& csv);
 
 // FUNCTIONS CALLED IN DO_COMPARE(COMPFILES)
-std::tuple<std::vector<std::string>,std::vector<std::string>> do_startup(const std::vector<std::string>& comps, std::ostream& os);
+std::tuple<std::vector<std::string>,std::vector<std::string>> do_startup(const std::vector<std::string_view>& comps, std::ostream& os);
 bool check_geoprep(const std::vector<std::string>& v1, const std::vector<std::string>& v2);
 void do_comparison(const std::vector<std::string>& v1, const std::vector<std::string>& v2, bool geoprepflag, std::ostream& os, std::ostream& csv);
 #endif /* FUNCTIONS_HPP_ */
